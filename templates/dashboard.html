@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}داشبورد من | سامانه رزرو غذای دانشگاه{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه داشبورد */
+    .dashboard-stats {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--card-shadow);
+        border: 2px solid var(--secondary-color);
+        color: white;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0;
+        color: white;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-card {
+        background-color: var(--transparent-bg);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        border: 1px solid var(--primary-light);
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: var(--secondary-color);
+    }
+    
+    .student-info-box {
+        background: linear-gradient(135deg, rgba(63, 106, 216, 0.1), rgba(41, 82, 179, 0.2));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .finance-info-box {
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.1), rgba(20, 108, 67, 0.2));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--secondary-color);
+    }
+    
+    .action-buttons .btn {
+        margin-bottom: 0.75rem;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .reservation-table {
+        background-color: var(--transparent-bg);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .reservation-table th {
+        background-color: var(--primary-dark);
+        color: white;
+        font-weight: 500;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .reservation-table td {
+        border-color: rgba(255, 255, 255, 0.05);
+        vertical-align: middle;
+    }
+    
+    .food-name {
+        font-weight: 500;
+        color: var(--secondary-color);
+    }
+    
+    .dashboard-title {
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        font-weight: bold;
+        border-bottom: 2px solid var(--secondary-color);
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        font-weight: bold;
+        border-bottom: 2px solid var(--secondary-color);
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-stats {
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-card {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <h2 class="dashboard-title"><i class="bi bi-speedometer2 me-2"></i>داشبورد من</h2>
+        
+        <!-- بخش آمار -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="dashboard-stats">
+                    <div class="text-center">
+                        <i class="bi bi-person-badge stat-icon"></i>
+                        <h3 class="stat-value">{{ student.feeding_code }}</h3>
+                        <p class="stat-label">کد تغذیه</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="dashboard-stats">
+                    <div class="text-center">
+                        <i class="bi bi-cart-check stat-icon"></i>
+                        <h3 class="stat-value">{{ reservations|length }}</h3>
+                        <p class="stat-label">تعداد رزروها</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="dashboard-stats">
+                    <div class="text-center">
+                        <i class="bi bi-check-circle-fill stat-icon"></i>
+                        <h3 class="stat-value">{{ delivered_count }}</h3>
+                        <p class="stat-label">تحویل شده</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="dashboard-stats">
+                    <div class="text-center">
+                        <i class="bi bi-wallet2 stat-icon"></i>
+                        <h3 class="stat-value">{{ "{:,}".format(student.debt|int) }}</h3>
+                        <p class="stat-label">بدهی (هزار تومان)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="mb-0"><i class="bi bi-person-badge me-2"></i>اطلاعات دانشجو</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="student-info-box mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle fs-1 me-3 text-primary"></i>
+                                <div>
+                                    <h5 class="mb-0">کد تغذیه:</h5>
+                                    <p class="fs-4 mb-0 text-secondary">{{ student.feeding_code }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="finance-info-box mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-wallet2 fs-1 me-3 text-success"></i>
+                                <div>
+                                    <h5 class="mb-0">بدهی دانشجو:</h5>
+                                    <p class="fs-4 mb-0 {% if student.debt > 0 %}text-danger{% else %}text-success{% endif %}">{{ "{:,}".format(student.debt|int) }} هزار تومان</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('menu') }}" class="btn btn-primary">
+                                    <i class="bi bi-calendar-plus me-2"></i>رزرو غذای جدید
+                                </a>
+                                <!-- بخش افزایش اعتبار فعلاً غیرفعال است -->
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    <i class="bi bi-cash-coin me-2"></i>افزایش اعتبار (غیرفعال)
+                                </button>
+                                {% if current_user.is_warehouse_manager or current_user.is_admin %}
+                                <a href="{{ url_for('warehouse_dashboard') }}" class="btn btn-success">
+                                    <i class="bi bi-boxes me-2"></i>مدیریت انبار
+                                </a>
+                                {% endif %}
+                                <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-gear me-2"></i>تنظیمات حساب کاربری
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="dashboard-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0"><i class="bi bi-list-check me-2"></i>رزروهای من</h3>
+                        {% if reservations %}
+                        <div>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelAllModal">
+                                <i class="bi bi-trash me-1"></i> لغو همه رزروها
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if reservations %}
+                        <div class="table-responsive reservation-table">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="bi bi-calendar3 me-1"></i>روز</th>
+                                        <th><i class="bi bi-clock me-1"></i>وعده</th>
+                                        <th><i class="bi bi-cup-hot me-1"></i>غذا</th>
+                                        <th><i class="bi bi-calendar-date me-1"></i>تاریخ ثبت</th>
+                                        <th><i class="bi bi-check2-circle me-1"></i>وضعیت</th>
+                                        <th><i class="bi bi-gear me-1"></i>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservation in reservations %}
+                                    <tr>
+                                        <td>
+                                            {% set day_mapping = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
+                                            <span class="badge bg-primary">{{ day_mapping[reservation.day] }}</span>
+                                        </td>
+                                        <td>
+                                            {% set meal_mapping = { 'breakfast': 'صبحانه', 'lunch': 'ناهار', 'dinner': 'شام' } %}
+                                            {% set meal_icons = { 'breakfast': 'bi-egg-fried', 'lunch': 'bi-cup-hot', 'dinner': 'bi-moon-stars' } %}
+                                            <span class="badge {% if reservation.meal == 'breakfast' %}bg-info{% elif reservation.meal == 'lunch' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                <i class="bi {{ meal_icons[reservation.meal] }} me-1"></i>
+                                                {{ meal_mapping[reservation.meal] }}
+                                            </span>
+                                        </td>
+                                        <td class="food-name">{{ reservation.food_name }}</td>
+                                        <td>{{ jalali_dates[reservation.id] }}</td>
+                                        <td>
+                                            {% if reservation.delivered == 1 %}
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>تحویل شده</span>
+                                            {% else %}
+                                            <span class="badge bg-warning"><i class="bi bi-hourglass-split me-1"></i>در انتظار تحویل</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if reservation.delivered == 0 %}
+                                            <form action="{{ url_for('cancel_reservation', reservation_id=reservation.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-x-lg me-1"></i>لغو رزرو
+                                                </button>
+                                            </form>
+                                            {% else %}
+                                            <button class="btn btn-sm btn-secondary" disabled><i class="bi bi-lock me-1"></i>لغو ناممکن</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill fs-2 me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">هنوز رزروی ثبت نشده!</h5>
+                                    <p class="mb-0">شما هنوز هیچ رزرو غذایی ندارید. برای رزرو غذا به صفحه <a href="{{ url_for('menu') }}" class="alert-link">منوی غذا</a> مراجعه کنید.</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط  سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- مدال لغو همه رزروها -->
+    <div class="modal fade" id="cancelAllModal" tabindex="-1" aria-labelledby="cancelAllModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="cancelAllModalLabel">لغو همه رزروها</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>شما می‌توانید رزروهای خود را بر اساس گزینه‌های زیر لغو کنید:</p>
+                    <div class="d-grid gap-3 mt-3">
+                        <!-- روزهای مختلف هفته -->
+                        {% set days = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
+                        
+                        {% for day_name, day_label in days.items() %}
+                        <form action="{{ url_for('cancel_all_day') }}" method="POST">
+                            <input type="hidden" name="day" value="{{ day_name }}">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-calendar-x"></i> لغو تمام رزروهای {{ day_label }}
+                            </button>
+                        </form>
+                        {% endfor %}
+                        
+                        <hr>
+                        
+                        <!-- لغو همه رزروهای هفته -->
+                        <form action="{{ url_for('cancel_all_week') }}" method="POST">
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bi bi-calendar-x"></i> لغو تمام رزروهای هفته
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // اسکریپت برای انیمیشن آمار و اطلاعات
+    document.addEventListener('DOMContentLoaded', function() {
+        // انیمیشن برای آمار
+        const stats = document.querySelectorAll('.stat-value');
+        stats.forEach(stat => {
+            const finalValue = parseInt(stat.textContent.trim());
+            if (!isNaN(finalValue)) {
+                let startValue = 0;
+                const duration = 1500;
+                const frameDuration = 1000 / 60;
+                const totalFrames = Math.round(duration / frameDuration);
+                const increment = finalValue / totalFrames;
+                
+                // شروع انیمیشن
+                let currentFrame = 0;
+                const counter = setInterval(() => {
+                    currentFrame++;
+                    const progress = Math.min(currentFrame / totalFrames, 1);
+                    const currentValue = Math.floor(progress * finalValue);
+                    stat.textContent = currentValue.toLocaleString();
+                    
+                    if (currentFrame === totalFrames) {
+                        clearInterval(counter);
+                        stat.textContent = finalValue.toLocaleString();
+                    }
+                }, frameDuration);
+            }
+        });
+        
+        // افکت hover برای جدول
+        const rows = document.querySelectorAll('.reservation-table tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.01)';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+                this.style.transition = 'all 0.3s ease';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+    });
+</script>
+{% endblock %}

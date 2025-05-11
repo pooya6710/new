@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <!-- پس زمینه -->
+  <rect width="800" height="600" fill="#004d40"/>
+  
+  <!-- الگوی اسلامی پس زمینه -->
+  <defs>
+    <pattern id="islamic-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M25 0L30 20L50 25L30 30L25 50L20 30L0 25L20 20L25 0Z" fill="none" stroke="#e8b835" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#islamic-pattern)"/>
+  
+  <!-- میز غذاخوری اصلی -->
+  <ellipse cx="400" cy="450" rx="250" ry="100" fill="#5d4037" stroke="#e8b835" stroke-width="3"/>
+  
+  <!-- سفره سنتی -->
+  <ellipse cx="400" cy="440" rx="230" ry="85" fill="#8d6e63" stroke="#e8b835" stroke-width="1"/>
+  
+  <!-- طرح های سفره -->
+  <ellipse cx="400" cy="440" rx="200" ry="70" fill="none" stroke="#e8b835" stroke-width="1" opacity="0.5" stroke-dasharray="5,5"/>
+  
+  <!-- بشقاب‌های اسلامی (با طرح‌های هندسی) -->
+  <!-- بشقاب اصلی در مرکز -->
+  <circle cx="400" cy="400" r="80" fill="#f5f5f5" stroke="#e8b835" stroke-width="2"/>
+  <circle cx="400" cy="400" r="70" fill="none" stroke="#e8b835" stroke-width="1" opacity="0.7"/>
+  <circle cx="400" cy="400" r="60" fill="none" stroke="#e8b835" stroke-width="1" opacity="0.5"/>
+  <circle cx="400" cy="400" r="50" fill="none" stroke="#004d40" stroke-width="1" opacity="0.3"/>
+  
+  <!-- غذا در بشقاب اصلی - برنج زعفرانی -->
+  <ellipse cx="400" cy="400" rx="45" ry="30" fill="#ffd54f" stroke="#e8b835" stroke-width="0.5"/>
+  
+  <!-- خورشت روی برنج -->
+  <ellipse cx="400" cy="385" rx="25" ry="15" fill="#5d4037" stroke="#4e342e" stroke-width="0.5"/>
+  
+  <!-- بشقاب‌های کوچکتر اطراف -->
+  <!-- بشقاب 1 - سالاد -->
+  <circle cx="280" cy="370" r="40" fill="#f5f5f5" stroke="#e8b835" stroke-width="1"/>
+  <circle cx="280" cy="370" r="35" fill="#81c784" stroke="#4caf50" stroke-width="0.5" opacity="0.8"/>
+  
+  <!-- بشقاب 2 - ماست -->
+  <circle cx="520" cy="370" r="40" fill="#f5f5f5" stroke="#e8b835" stroke-width="1"/>
+  <circle cx="520" cy="370" r="35" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="0.5" opacity="0.8"/>
+  
+  <!-- بشقاب 3 - نان -->
+  <ellipse cx="400" cy="500" rx="80" ry="40" fill="#d7ccc8" stroke="#8d6e63" stroke-width="1"/>
+  <ellipse cx="400" cy="500" rx="75" ry="35" fill="none" stroke="#8d6e63" stroke-width="1" opacity="0.3" stroke-dasharray="2,2"/>
+  
+  <!-- کاسه‌های کوچک برای ادویه‌ها -->
+  <circle cx="300" cy="450" r="20" fill="#ffab91" stroke="#e8b835" stroke-width="1"/>  <!-- زعفران -->
+  <circle cx="500" cy="450" r="20" fill="#6d4c41" stroke="#e8b835" stroke-width="1"/>  <!-- سماق -->
+  
+  <!-- لیوان‌های شربت -->
+  <rect x="230" cy="420" width="20" height="30" fill="#b39ddb" stroke="#e8b835" stroke-width="1" rx="2" ry="2"/>
+  <rect x="550" cy="420" width="20" height="30" fill="#b39ddb" stroke="#e8b835" stroke-width="1" rx="2" ry="2"/>
+  
+  <!-- قاشق و چنگال با طرح اسلامی -->
+  <rect x="325" y="440" width="5" height="30" fill="#e8b835" rx="2" ry="2"/>
+  <rect x="475" y="440" width="5" height="30" fill="#e8b835" rx="2" ry="2"/>
+  <path d="M475,440 Q480,430 485,440" fill="none" stroke="#e8b835" stroke-width="1"/>
+  <path d="M475,440 Q470,430 465,440" fill="none" stroke="#e8b835" stroke-width="1"/>
+  
+  <!-- چراغ آویز فانوسی اسلامی بالای میز -->
+  <path d="M400,50 L400,150" stroke="#e8b835" stroke-width="2"/>
+  <path d="M360,150 C360,120 440,120 440,150 L440,230 C440,260 360,260 360,230 Z" fill="#00695c" stroke="#e8b835" stroke-width="3"/>
+  
+  <!-- طرح‌های اسلامی روی فانوس -->
+  <path d="M380,160 Q400,140 420,160" fill="none" stroke="#e8b835" stroke-width="1"/>
+  <path d="M380,180 Q400,160 420,180" fill="none" stroke="#e8b835" stroke-width="1"/>
+  <path d="M380,200 Q400,180 420,200" fill="none" stroke="#e8b835" stroke-width="1"/>
+  <path d="M380,220 Q400,200 420,220" fill="none" stroke="#e8b835" stroke-width="1"/>
+  
+  <!-- نور فانوس -->
+  <ellipse cx="400" cy="270" rx="80" ry="20" fill="#e8b835" opacity="0.1"/>
+  
+  <!-- طاق‌های اسلامی در دیوار پشت -->
+  <path d="M150,100 Q250,50 350,100" fill="none" stroke="#e8b835" stroke-width="2" opacity="0.5"/>
+  <path d="M450,100 Q550,50 650,100" fill="none" stroke="#e8b835" stroke-width="2" opacity="0.5"/>
+  
+  <!-- تزئینات دیوار با طرح اسلامی -->
+  <rect x="100" y="100" width="600" height="150" fill="#00695c" opacity="0.3" stroke="#e8b835" stroke-width="1"/>
+  
+  <!-- الگوی اسلامی در دیوار -->
+  <path d="M150,125 H650" stroke="#e8b835" stroke-width="1" opacity="0.3" stroke-dasharray="10,5"/>
+  <path d="M150,175 H650" stroke="#e8b835" stroke-width="1" opacity="0.3" stroke-dasharray="10,5"/>
+  <path d="M150,225 H650" stroke="#e8b835" stroke-width="1" opacity="0.3" stroke-dasharray="10,5"/>
+</svg>

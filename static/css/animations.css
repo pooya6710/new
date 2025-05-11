@@ -1,0 +1,385 @@
+/* انیمیشن‌های پیشرفته برای سایت رزرو غذای دانشگاه */
+
+/* انیمیشن‌های ورود عناصر */
+.fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.6s ease-in-out;
+}
+
+.slide-down {
+    animation: slideDown 0.6s ease-in-out;
+}
+
+.slide-left {
+    animation: slideLeft 0.6s ease-in-out;
+}
+
+.slide-right {
+    animation: slideRight 0.6s ease-in-out;
+}
+
+.zoom-in {
+    animation: zoomIn 0.6s ease-in-out;
+}
+
+.bounce-in {
+    animation: bounceIn 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+
+/* انیمیشن‌های لودینگ */
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+.spinner {
+    animation: spinner 1s linear infinite;
+}
+
+.wave {
+    animation: wave 1.5s infinite;
+}
+
+/* انیمیشن‌های تعاملی */
+.hover-grow {
+    transition: transform 0.3s ease;
+}
+
+.hover-grow:hover {
+    transform: scale(1.05);
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 15px rgba(var(--secondary-color-rgb), 0.5);
+}
+
+.hover-bright {
+    transition: filter 0.3s ease;
+}
+
+.hover-bright:hover {
+    filter: brightness(1.2);
+}
+
+/* انیمیشن شناور */
+.float {
+    animation: float 3s infinite;
+}
+
+.float-slow {
+    animation: float 6s infinite;
+}
+
+.float-fast {
+    animation: float 1.5s infinite;
+}
+
+/* انیمیشن‌های گرادیان */
+.gradient-shift {
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+}
+
+.border-glow {
+    animation: borderGlow 2s infinite;
+}
+
+/* انیمیشن نمایش تدریجی متن */
+.typing {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end);
+}
+
+/* تعریف کلیدهای انیمیشن */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+    0% { opacity: 0; transform: scale(0.3); }
+    20% { transform: scale(1.1); }
+    40% { transform: scale(0.9); }
+    60% { opacity: 1; transform: scale(1.03); }
+    80% { transform: scale(0.97); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+@keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes wave {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes borderGlow {
+    0% { border-color: var(--primary-color); }
+    50% { border-color: var(--secondary-color); }
+    100% { border-color: var(--primary-color); }
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* انیمیشن کلیک دکمه */
+.btn-click-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-click-effect:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-click-effect:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* انیمیشن تغییر رنگ گرادیان برای عناصر خاص */
+.gradient-text {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientText 5s linear infinite;
+}
+
+@keyframes gradientText {
+    to { background-position: 200% center; }
+}
+
+/* انیمیشن نمایش تدریجی برای لیست‌ها */
+.staggered-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.staggered-list .staggered-item:nth-child(1) { animation: staggerFadeIn 0.5s 0.1s forwards; }
+.staggered-list .staggered-item:nth-child(2) { animation: staggerFadeIn 0.5s 0.2s forwards; }
+.staggered-list .staggered-item:nth-child(3) { animation: staggerFadeIn 0.5s 0.3s forwards; }
+.staggered-list .staggered-item:nth-child(4) { animation: staggerFadeIn 0.5s 0.4s forwards; }
+.staggered-list .staggered-item:nth-child(5) { animation: staggerFadeIn 0.5s 0.5s forwards; }
+.staggered-list .staggered-item:nth-child(6) { animation: staggerFadeIn 0.5s 0.6s forwards; }
+.staggered-list .staggered-item:nth-child(7) { animation: staggerFadeIn 0.5s 0.7s forwards; }
+.staggered-list .staggered-item:nth-child(8) { animation: staggerFadeIn 0.5s 0.8s forwards; }
+.staggered-list .staggered-item:nth-child(9) { animation: staggerFadeIn 0.5s 0.9s forwards; }
+.staggered-list .staggered-item:nth-child(10) { animation: staggerFadeIn 0.5s 1s forwards; }
+
+@keyframes staggerFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* انیمیشن جذاب برای نمایش روزهای هفته در منوی غذا */
+.day-card {
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.day-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-color), transparent);
+    z-index: -1;
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.day-card:hover::before {
+    transform: translateX(0);
+}
+
+/* انیمیشن چشمک زدن برای نمایش اعلان‌های جدید */
+.notification-badge {
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* انیمیشن نمایش جدول‌های داده */
+.data-table-row {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.data-table .data-table-row:nth-child(1) { animation: tableRowFadeIn 0.4s 0.1s forwards; }
+.data-table .data-table-row:nth-child(2) { animation: tableRowFadeIn 0.4s 0.15s forwards; }
+.data-table .data-table-row:nth-child(3) { animation: tableRowFadeIn 0.4s 0.2s forwards; }
+.data-table .data-table-row:nth-child(4) { animation: tableRowFadeIn 0.4s 0.25s forwards; }
+.data-table .data-table-row:nth-child(5) { animation: tableRowFadeIn 0.4s 0.3s forwards; }
+.data-table .data-table-row:nth-child(6) { animation: tableRowFadeIn 0.4s 0.35s forwards; }
+.data-table .data-table-row:nth-child(7) { animation: tableRowFadeIn 0.4s 0.4s forwards; }
+.data-table .data-table-row:nth-child(8) { animation: tableRowFadeIn 0.4s 0.45s forwards; }
+.data-table .data-table-row:nth-child(9) { animation: tableRowFadeIn 0.4s 0.5s forwards; }
+.data-table .data-table-row:nth-child(10) { animation: tableRowFadeIn 0.4s 0.55s forwards; }
+
+@keyframes tableRowFadeIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* انیمیشن مخصوص برای نمایش نتیجه جستجو */
+.search-result {
+    transform-origin: top;
+    animation: searchResult 0.3s ease-out;
+}
+
+@keyframes searchResult {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* انیمیشن بارگذاری بخش‌های مختلف صفحه */
+.section-fade-in {
+    opacity: 0;
+    animation: sectionFadeIn 1s ease-out forwards;
+}
+
+.section-fade-in-delay-1 {
+    opacity: 0;
+    animation: sectionFadeIn 1s ease-out 0.3s forwards;
+}
+
+.section-fade-in-delay-2 {
+    opacity: 0;
+    animation: sectionFadeIn 1s ease-out 0.6s forwards;
+}
+
+.section-fade-in-delay-3 {
+    opacity: 0;
+    animation: sectionFadeIn 1s ease-out 0.9s forwards;
+}
+
+@keyframes sectionFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* انیمیشن منحصر به فرد برای منوهای کشویی */
+.custom-dropdown-menu {
+    transform-origin: top;
+    animation: dropdownOpen 0.3s ease-out;
+}
+
+@keyframes dropdownOpen {
+    from {
+        opacity: 0;
+        transform: scaleY(0.7) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1) translateY(0);
+    }
+}

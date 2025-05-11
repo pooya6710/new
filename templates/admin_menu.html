@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت منوی غذا | سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">سامانه رزرو غذای دانشگاه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد من</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('menu') }}">منوی غذا</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="mb-0">مدیریت منوی غذا</h3>
+                            <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                        </div>
+                        
+                        <!-- انتخاب هفته جاری یا آینده -->
+                        <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('admin_menu', week=0) }}" class="btn {% if request.args.get('week', '0') == '0' %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-check"></i> ویرایش منوی هفته جاری
+                                </a>
+                                <a href="{{ url_for('admin_menu', week=1) }}" class="btn {% if request.args.get('week', '0') == '1' %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-plus"></i> ویرایش منوی هفته آینده
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('admin_update_menu', week=request.args.get('week', '0')) }}" method="POST">
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <label for="day" class="form-label">انتخاب روز</label>
+                                    <select class="form-select" id="day" name="day" required>
+                                        {% for day_key, day_name in days.items() %}
+                                        <option value="{{ day_key }}">{{ day_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="meal" class="form-label">انتخاب وعده</label>
+                                    <select class="form-select" id="meal" name="meal" required>
+                                        {% for meal_key, meal_name in meals.items() %}
+                                        <option value="{{ meal_key }}">{{ meal_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button type="button" id="loadMenuBtn" class="btn btn-info w-100">بارگیری منوی فعلی</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="food_items" class="form-label">فهرست غذاها (هر غذا در یک خط)</label>
+                                <textarea class="form-control" id="food_items" name="food_items" rows="8" required></textarea>
+                                <small class="form-text text-muted">هر غذا را در یک خط جداگانه وارد کنید.</small>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">منوی غذایی فعلی</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>روز</th>
+                                        <th>صبحانه</th>
+                                        <th>ناهار</th>
+                                        <th>شام</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for day_item in weekly_menu %}
+                                    <tr>
+                                        <td><strong>{% if day_item.day.endswith('_next') %}{{ days[day_item.display_day] }} (هفته آینده){% else %}{{ days[day_item.display_day] }}{% endif %}</strong></td>
+                                        <td>
+                                            {% if day_item.meal_data.breakfast and day_item.meal_data.breakfast|length > 0 %}
+                                                {% set food = day_item.meal_data.breakfast[0] %}
+                                                {% if food is mapping %}
+                                                    {{ food.name }} <span class="badge bg-success">2000 تومان</span>
+                                                {% else %}
+                                                    {{ food }} <span class="badge bg-success">2000 تومان</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">غذایی تعریف نشده</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if day_item.meal_data.lunch and day_item.meal_data.lunch|length > 0 %}
+                                                {% set food = day_item.meal_data.lunch[0] %}
+                                                {% if food is mapping %}
+                                                    {{ food.name }} <span class="badge bg-success">3000 تومان</span>
+                                                {% else %}
+                                                    {{ food }} <span class="badge bg-success">3000 تومان</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">غذایی تعریف نشده</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if day_item.meal_data.dinner and day_item.meal_data.dinner|length > 0 %}
+                                                {% set food = day_item.meal_data.dinner[0] %}
+                                                {% if food is mapping %}
+                                                    {{ food.name }} <span class="badge bg-success">5000 تومان</span>
+                                                {% else %}
+                                                    {{ food }} <span class="badge bg-success">5000 تومان</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">غذایی تعریف نشده</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط  سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // بارگیری اطلاعات منوی فعلی با مدیریت خطا
+        document.addEventListener('DOMContentLoaded', function() {
+            // بررسی وجود المان‌های DOM مورد نیاز
+            const loadMenuBtn = document.getElementById('loadMenuBtn');
+            const daySelect = document.getElementById('day');
+            const mealSelect = document.getElementById('meal');
+            const foodItemsTextarea = document.getElementById('food_items');
+            
+            if (!loadMenuBtn || !daySelect || !mealSelect || !foodItemsTextarea) {
+                console.error('خطا در یافتن المان‌های مورد نیاز فرم');
+                return;
+            }
+            
+            // ساختار داده‌های منو
+            try {
+                const menuData = {
+                    {% for day_item in weekly_menu %}
+                    "{{ day_item.day }}": {
+                        {% for meal_key, foods in day_item.meal_data.items() %}
+                        "{{ meal_key }}": {{ foods|tojson }},
+                        {% endfor %}
+                    },
+                    {% endfor %}
+                };
+                
+                console.log('داده‌های منو با موفقیت بارگیری شد:', menuData);
+                
+                // عملیات بارگیری منوی انتخاب شده
+                loadMenuBtn.addEventListener('click', function() {
+                    let day = daySelect.value;
+                    const meal = mealSelect.value;
+                    // بررسی آیا در حالت هفته آینده هستیم
+                    const isNextWeek = {{ request.args.get('week', '0') }} === '1' || {{ request.args.get('week', '0') }} === 1;
+                    
+                    // اضافه کردن یا حذف پسوند _next بر اساس هفته انتخاب شده
+                    if (isNextWeek && !day.endsWith('_next')) {
+                        day = day + '_next';
+                    } else if (!isNextWeek && day.endsWith('_next')) {
+                        day = day.replace('_next', '');
+                    }
+                    
+                    console.log(`تلاش برای بارگیری منوی ${day} وعده ${meal} (هفته ${isNextWeek ? 'آینده' : 'جاری'})`);
+                    
+                    // بررسی وجود داده‌های منو
+                    if (menuData[day] && menuData[day][meal]) {
+                        const foodItems = menuData[day][meal];
+                        console.log(`غذاهای یافت شده برای ${day} وعده ${meal}:`, foodItems);
+                        
+                        if (Array.isArray(foodItems)) {
+                            // ترکیب لیست غذاها با خط جدید
+                            let foodText = '';
+                            for (const item of foodItems) {
+                                // اگر آیتم شیء باشد، فقط نام آن را در نظر می‌گیریم
+                                if (typeof item === 'object' && item !== null && item.name) {
+                                    foodText += item.name + '\n';
+                                } else if (typeof item === 'string') {
+                                    foodText += item + '\n';
+                                }
+                            }
+                            foodItemsTextarea.value = foodText.trim();
+                        } else {
+                            console.warn('فرمت غیرمنتظره داده‌های غذا:', foodItems);
+                            foodItemsTextarea.value = '';
+                        }
+                    } else {
+                        console.log(`هیچ غذایی برای ${day} وعده ${meal} یافت نشد`);
+                        foodItemsTextarea.value = '';
+                    }
+                });
+                
+                // برای بهبود تجربه کاربری، به صورت خودکار منوی روز و وعده انتخاب شده را بارگیری می‌کنیم
+                daySelect.addEventListener('change', function() {
+                    // بارگیری خودکار با تغییر روز یا وعده
+                    loadMenuBtn.click();
+                });
+                
+                mealSelect.addEventListener('change', function() {
+                    // بارگیری خودکار با تغییر روز یا وعده
+                    loadMenuBtn.click();
+                });
+                
+                // بارگیری اولیه غذاها بر اساس مقادیر پیش‌فرض
+                setTimeout(function() {
+                    loadMenuBtn.click();
+                }, 100);
+                
+            } catch (error) {
+                console.error('خطا در راه‌اندازی اسکریپت منو:', error);
+            }
+        });
+    </script>
+</body>
+</html>

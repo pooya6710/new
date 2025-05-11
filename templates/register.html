@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت‌نام | سامانه رزرو غذای دانشگاه{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه ثبت‌نام */
+    .auth-container {
+        min-height: calc(100vh - 250px);
+        display: flex;
+        align-items: center;
+    }
+    
+    .auth-image {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/static/images/islamic-pattern.svg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        border-radius: 10px 0 0 10px;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
+    .auth-image h2 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+    
+    .auth-form {
+        background-color: white;
+        border-radius: 0 10px 10px 0;
+        padding: 3rem 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-image, .auth-form {
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+    }
+    
+    .form-heading {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .input-group-text {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        border: 1px solid var(--primary-light);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .auth-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        padding: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-top: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .auth-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .steps {
+        counter-reset: step-counter;
+        padding: 0;
+        margin: 2rem 0;
+    }
+    
+    .step-item {
+        position: relative;
+        list-style-type: none;
+        padding-right: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .step-item:before {
+        counter-increment: step-counter;
+        content: counter(step-counter);
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+    }
+    
+    .step-item:after {
+        content: '';
+        position: absolute;
+        right: 15px;
+        top: 30px;
+        height: calc(100% - 15px);
+        width: 2px;
+        background-color: var(--primary-light);
+    }
+    
+    .step-item:last-child:after {
+        display: none;
+    }
+    
+    .password-strength {
+        height: 5px;
+        margin-top: 5px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-text {
+        font-size: 0.8rem;
+        margin-top: 5px;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="row g-0 shadow">
+        <!-- بخش تصویر و راهنما -->
+        <div class="col-md-6 d-none d-md-block">
+            <div class="auth-image">
+                <h2>سامانه رزرو غذای دانشگاه</h2>
+                <p>برای استفاده از خدمات رزرو آنلاین غذا لطفاً ثبت‌نام کنید.</p>
+                
+                <ul class="steps">
+                    <li class="step-item">
+                        <h5>ثبت‌نام کنید</h5>
+                        <p>با وارد کردن کد تغذیه دانشجویی و رمز عبور دلخواه خود ثبت‌نام کنید.</p>
+                    </li>
+                    <li class="step-item">
+                        <h5>وارد سامانه شوید</h5>
+                        <p>با استفاده از کد تغذیه و رمز عبور خود وارد سامانه شوید.</p>
+                    </li>
+                    <li class="step-item">
+                        <h5>منوی غذا را مشاهده کنید</h5>
+                        <p>منوی هفتگی غذاها را مشاهده کنید و غذای دلخواه خود را انتخاب کنید.</p>
+                    </li>
+                    <li class="step-item">
+                        <h5>رزرو غذا</h5>
+                        <p>غذای مورد نظر خود را رزرو کنید و در تاریخ مقرر تحویل بگیرید.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- فرم ثبت‌نام -->
+        <div class="col-md-6">
+            <div class="auth-form">
+                <h3 class="form-heading">ثبت‌نام در سامانه رزرو غذا</h3>
+                
+                <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                    <div class="mb-4">
+                        <label for="feeding_code" class="form-label font-bold">کد تغذیه دانشجویی <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" class="form-control" id="feeding_code" name="feeding_code" placeholder="کد تغذیه دانشجویی خود را وارد کنید" required>
+                        </div>
+                        <small class="text-muted">کد تغذیه دانشجویی و رمز عبور باید منحصر به فرد باشد</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label font-bold">رمز عبور <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="رمز عبور خود را وارد کنید" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" title="نمایش رمز عبور">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <small class="strength-text" id="strengthText">قدرت رمز عبور: وارد نشده</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label font-bold">تکرار رمز عبور <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="رمز عبور را مجدداً وارد کنید" required>
+                        </div>
+                        <small class="text-danger d-none" id="passwordMismatch">رمز عبور و تکرار آن مطابقت ندارند</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary auth-btn" id="submitBtn">
+                            <i class="bi bi-person-plus me-2"></i>ثبت‌نام در سامانه
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>قبلاً ثبت‌نام کرده‌اید؟ <a href="{{ url_for('login') }}" class="text-decoration-none">وارد شوید</a></p>
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-house-door me-1"></i>بازگشت به صفحه اصلی
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- جاوااسکریپت اضافی برای صفحه ثبت‌نام -->
+<script>
+    // این کد به طور کامل بازنویسی شده است
+    document.addEventListener('DOMContentLoaded', function() {
+        // انتخاب المان‌های مورد نیاز
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+        const mismatchText = document.getElementById('passwordMismatch');
+        const submitBtn = document.getElementById('submitBtn');
+        const registerForm = document.getElementById('registerForm');
+        
+        // تنظیم حالت اولیه
+        passwordStrength.style.width = '0%';
+        passwordStrength.style.backgroundColor = '#e9ecef';
+        strengthText.textContent = 'قدرت رمز عبور: وارد نشده';
+        strengthText.style.color = '#e9ecef';
+        
+        // تابع برای به‌روزرسانی قدرت رمز عبور
+        function updatePasswordStrength() {
+            // دریافت مقدار رمز عبور
+            const password = passwordInput.value || '';
+            
+            // متغیرهای مورد نیاز
+            let strength = 0;
+            let status = '';
+            let color = '';
+            
+            console.log("Password length:", password.length);
+            
+            // بررسی خالی بودن رمز عبور
+            if (password.length === 0) {
+                status = 'وارد نشده';
+                color = '#e9ecef';
+                strength = 0;
+            } 
+            // بررسی طول رمز عبور
+            else if (password.length < 6) {
+                status = 'ضعیف';
+                color = '#dc3545';
+                strength = 25;
+            } 
+            // ارزیابی قدرت رمز عبور
+            else {
+                // امتیاز اولیه برای طول کافی
+                strength += 25;
+                
+                // بررسی وجود حروف بزرگ و کوچک
+                if (/[A-Z]/.test(password) && /[a-z]/.test(password)) {
+                    strength += 25;
+                }
+                
+                // بررسی وجود اعداد
+                if (/[0-9]/.test(password)) {
+                    strength += 25;
+                }
+                
+                // بررسی وجود کاراکترهای خاص
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    strength += 25;
+                }
+                
+                // تعیین وضعیت
+                if (strength <= 25) {
+                    status = 'ضعیف';
+                    color = '#dc3545';
+                } else if (strength <= 50) {
+                    status = 'متوسط';
+                    color = '#ffc107';
+                } else if (strength <= 75) {
+                    status = 'خوب';
+                    color = '#28a745';
+                } else {
+                    status = 'عالی';
+                    color = '#198754';
+                }
+            }
+            
+            console.log("Strength:", strength, "Status:", status, "Color:", color);
+            
+            // نمایش نتیجه
+            passwordStrength.style.width = strength + '%';
+            passwordStrength.style.backgroundColor = color;
+            strengthText.textContent = 'قدرت رمز عبور: ' + status;
+            strengthText.style.color = color;
+        }
+        
+        // نمایش و مخفی کردن رمز عبور
+        togglePasswordBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // جلوگیری از submit شدن فرم با کلیک روی دکمه
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePasswordBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                togglePasswordBtn.title = 'پنهان کردن رمز عبور';
+            } else {
+                passwordInput.type = 'password';
+                togglePasswordBtn.innerHTML = '<i class="bi bi-eye"></i>';
+                togglePasswordBtn.title = 'نمایش رمز عبور';
+            }
+        });
+        
+        // افزودن رویداد ورودی به فیلد رمز عبور
+        passwordInput.addEventListener('input', function() {
+            updatePasswordStrength();
+            
+            // بررسی تطابق رمز عبور
+            if (confirmPasswordInput.value) {
+                if (this.value !== confirmPasswordInput.value) {
+                    mismatchText.classList.remove('d-none');
+                    confirmPasswordInput.setCustomValidity('رمز عبور مطابقت ندارد');
+                } else {
+                    mismatchText.classList.add('d-none');
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            }
+        });
+        
+        // افزودن رویداد ورودی به فیلد تأیید رمز عبور
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value !== passwordInput.value) {
+                mismatchText.classList.remove('d-none');
+                this.setCustomValidity('رمز عبور مطابقت ندارد');
+            } else {
+                mismatchText.classList.add('d-none');
+                this.setCustomValidity('');
+            }
+        });
+        
+        // اعتبارسنجی فرم قبل از ارسال
+        registerForm.addEventListener('submit', function(event) {
+            updatePasswordStrength();
+            
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                event.preventDefault();
+                mismatchText.classList.remove('d-none');
+                confirmPasswordInput.setCustomValidity('رمز عبور مطابقت ندارد');
+            }
+        });
+        
+        // فراخوانی اولیه برای اطمینان از نمایش صحیح
+        setTimeout(updatePasswordStrength, 100);
+    });
+</script>
+{% endblock %}

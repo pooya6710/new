@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت دستور پخت | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .food-usage-table th, .food-usage-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .food-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .food-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 15px;
+        font-weight: bold;
+    }
+    
+    .food-card .card-body {
+        padding: 15px;
+    }
+    
+    .food-item {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .food-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-amount {
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link active">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <!-- افزودن دستور پخت جدید -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">افزودن دستور پخت جدید</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('warehouse_add_food_usage') }}">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="food_name" class="form-label">نام غذا</label>
+                                <select id="food_name" name="food_name" class="form-select" required>
+                                    <option value="">انتخاب کنید...</option>
+                                    {% for food_name in food_names %}
+                                        <option value="{{ food_name }}">{{ food_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="item_id" class="form-label">ماده اولیه</label>
+                                <select id="item_id" name="item_id" class="form-select" required>
+                                    <option value="">انتخاب کنید...</option>
+                                    {% for item in inventory_items %}
+                                        <option value="{{ item.id }}">{{ item.name }} ({{ item.unit }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="quantity_per_serving" class="form-label">مقدار مصرف هر پرس</label>
+                                <div class="input-group">
+                                    <input type="number" id="quantity_per_serving" name="quantity_per_serving" class="form-control" step="0.01" min="0.01" required>
+                                    <span class="input-group-text" id="unit-addon">واحد</span>
+                                </div>
+                                <div class="form-text">مقدار مصرف هر ماده اولیه به ازای یک پرس غذا</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i> افزودن به دستور پخت
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- لیست دستورات پخت -->
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">دستورات پخت</h5>
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" id="foodSearch" class="form-control" placeholder="جستجوی غذا...">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if food_usages %}
+                        <!-- گروه‌بندی دستورات پخت بر اساس نام غذا -->
+                        {% set food_groups = {} %}
+                        {% for usage in food_usages %}
+                            {% if usage.food_name not in food_groups %}
+                                {% set _ = food_groups.update({usage.food_name: []}) %}
+                            {% endif %}
+                            {% set _ = food_groups[usage.food_name].append(usage) %}
+                        {% endfor %}
+                        
+                        <div id="foodList">
+                            {% for food_name, usages in food_groups.items() %}
+                                <div class="food-card" data-food-name="{{ food_name }}">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <span>{{ food_name }}</span>
+                                        <span class="badge bg-primary">{{ usages|length }} ماده اولیه</span>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        {% for usage in usages %}
+                                            <div class="food-item">
+                                                <div class="item-info">
+                                                    <strong>{{ usage.item.name }}</strong>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="item-amount me-3">{{ usage.quantity_per_serving }} {{ usage.item.unit }} / پرس</span>
+                                                    <form method="post" action="{{ url_for('warehouse_delete_food_usage', usage_id=usage.id) }}" onsubmit="return confirm('آیا از حذف این ماده اولیه از دستور پخت اطمینان دارید؟');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div id="noResults" class="alert alert-info d-none">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            هیچ غذایی با عبارت جستجو شده یافت نشد.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            هیچ دستور پختی ثبت نشده است. لطفاً با استفاده از فرم بالا دستور پخت جدید اضافه کنید.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // نمایش واحد ماده اولیه انتخاب شده در کادر مقدار
+        const itemSelect = document.getElementById('item_id');
+        const unitAddon = document.getElementById('unit-addon');
+        
+        itemSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                // استخراج واحد از متن گزینه انتخاب شده
+                const itemText = selectedOption.text;
+                const unitMatch = itemText.match(/\(([^)]+)\)/);
+                if (unitMatch && unitMatch[1]) {
+                    unitAddon.textContent = unitMatch[1];
+                } else {
+                    unitAddon.textContent = 'واحد';
+                }
+            } else {
+                unitAddon.textContent = 'واحد';
+            }
+        });
+        
+        // جستجو در دستورات پخت
+        const foodSearch = document.getElementById('foodSearch');
+        const foodCards = document.querySelectorAll('.food-card');
+        const noResults = document.getElementById('noResults');
+        
+        foodSearch.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            let foundAny = false;
+            
+            foodCards.forEach(card => {
+                const foodName = card.getAttribute('data-food-name').toLowerCase();
+                const foodItems = Array.from(card.querySelectorAll('.food-item')).map(item => item.textContent.toLowerCase());
+                
+                // جستجو در نام غذا یا مواد اولیه
+                const matchesName = foodName.includes(searchTerm);
+                const matchesItems = foodItems.some(item => item.includes(searchTerm));
+                
+                if (searchTerm === '' || matchesName || matchesItems) {
+                    card.style.display = '';
+                    foundAny = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // نمایش یا مخفی کردن پیام "نتیجه‌ای یافت نشد"
+            if (searchTerm !== '' && !foundAny) {
+                noResults.classList.remove('d-none');
+            } else {
+                noResults.classList.add('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

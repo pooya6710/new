@@ -1,0 +1,613 @@
+/* افکت‌ها و کلاس‌های مدرن برای سایت رزرو غذای دانشگاه */
+
+/* کارت‌های مدرن (طراحی نئومورفیسم) */
+.card-neomorphic {
+    border-radius: 12px;
+    background-color: var(--dark-color);
+    box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.2),
+                -8px -8px 15px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.card-neomorphic:hover {
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.25),
+                -10px -10px 20px rgba(255, 255, 255, 0.07);
+}
+
+/* کارت شیشه‌ای (گلاسمورفیسم) */
+.card-glass {
+    background: rgba(26, 27, 47, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card-glass:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(var(--secondary-color-rgb), 0.3);
+}
+
+/* کارت با انیمیشن سه‌بعدی */
+.card-3d {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.card-3d:hover {
+    transform: rotateY(5deg) rotateX(5deg);
+}
+
+/* افکت رنگ‌گذاری متن */
+.text-gradient {
+    background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* افکت رنگ‌گذاری متن با انیمیشن */
+.text-gradient-animated {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color), var(--primary-color));
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: textGradientAnimation 6s linear infinite;
+}
+
+@keyframes textGradientAnimation {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+
+/* دکمه‌ها با طراحی جدید */
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.btn-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.btn-modern:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* دکمه شیشه‌ای */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* لیبل‌ها و بج‌های شیک */
+.badge-fancy {
+    background: linear-gradient(120deg, var(--primary-color), var(--primary-dark));
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* بج شیشه‌ای */
+.badge-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* فورم‌های مدرن */
+.form-modern input,
+.form-modern select,
+.form-modern textarea {
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--light-color);
+    transition: all 0.3s ease;
+}
+
+.form-modern input:focus,
+.form-modern select:focus,
+.form-modern textarea:focus {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
+}
+
+.form-modern label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--light-color);
+    letter-spacing: 0.5px;
+}
+
+/* فورم استایل فلوتینگ */
+.form-floating-label {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-floating-label input,
+.form-floating-label select,
+.form-floating-label textarea {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--light-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-floating-label label {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.form-floating-label input:focus ~ label,
+.form-floating-label input:not(:placeholder-shown) ~ label,
+.form-floating-label select:focus ~ label,
+.form-floating-label textarea:focus ~ label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: var(--primary-color);
+    background-color: var(--dark-color);
+    padding: 0 5px;
+}
+
+.form-floating-label input:focus,
+.form-floating-label select:focus,
+.form-floating-label textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
+}
+
+/* نوار پیشرفت مدرن */
+.progress-modern {
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-modern .progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background-size: 200% 100%;
+    animation: progressAnimation 2s linear infinite;
+    height: 100%;
+    border-radius: 4px;
+}
+
+@keyframes progressAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* جدول‌های مدرن */
+.table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-modern th {
+    background-color: rgba(78, 84, 200, 0.2);
+    color: var(--light-color);
+    border-top: 2px solid var(--primary-color);
+    padding: 12px 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.table-modern td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.table-modern tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-modern tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* طراحی دکمه‌های آیکونی */
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* افکت‌های هاور برای کارت‌ها */
+.card-hover-scale {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-scale:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-hover-up {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-up:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* آیکون‌های مدرن با افکت */
+.icon-gradient {
+    background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.icon-shadow {
+    text-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.5);
+}
+
+.icon-fancy {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.icon-fancy::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: rgba(var(--primary-color-rgb), 0.1);
+    border-radius: 50%;
+    z-index: -1;
+    transition: all 0.3s ease;
+    transform: scale(0);
+}
+
+.icon-fancy:hover::after {
+    transform: scale(1);
+}
+
+/* طراحی مدرن برای بج‌ها و نوتیفیکیشن‌ها */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(45deg, var(--danger-color), #ff6b6b);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(255, 59, 48, 0.4);
+}
+
+/* دیوایدرهای مدرن */
+.divider-gradient {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    margin: 20px 0;
+}
+
+.divider-glow {
+    height: 1px;
+    background-color: var(--primary-color);
+    box-shadow: 0 0 8px 1px var(--primary-glow-color);
+    margin: 20px 0;
+}
+
+.divider-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.divider-dots::before,
+.divider-dots::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 10px;
+}
+
+.divider-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    margin: 0 3px;
+}
+
+/* استایل‌های مدرن برای منوی غذا */
+.food-card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.food-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.food-card-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.food-card-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.food-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.food-card-content {
+    padding: 20px;
+}
+
+.food-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.food-card-price {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.food-card-price .price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+/* استایل برای ایونت‌های هفته */
+.day-event {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-left: 4px solid var(--primary-color);
+}
+
+.day-event:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.day-event-time {
+    font-size: 14px;
+    color: var(--secondary-color);
+    margin-bottom: 5px;
+}
+
+.day-event-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* استایل مدرن برای دکمه اکشن شناور */
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* زیر منوهای فب */
+.fab-menu {
+    position: fixed;
+    bottom: 90px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.fab-menu.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fab-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.fab-item-label {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-right: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+}
+
+.fab-item-button {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.fab-item-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* سایدبار دسکتاپ مدرن */
+.sidebar-modern {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: var(--transparent-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+}
+
+/* مودال‌های شیک */
+.modal-fancy .modal-content {
+    background-color: rgba(26, 27, 47, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.modal-fancy .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+}
+
+.modal-fancy .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+}
+
+.modal-fancy .close {
+    color: var(--light-color);
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+.modal-fancy .modal-title {
+    font-weight: 600;
+    color: var(--light-color);
+}

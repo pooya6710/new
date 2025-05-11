@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}تراکنش‌های انبار | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .transactions-table th, .transactions-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .transaction-type {
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .transaction-add {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .transaction-remove {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .transaction-adjust {
+        background-color: #cfe2ff;
+        color: #0a58ca;
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-right: 40px;
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .filter-box {
+        min-width: 150px;
+    }
+    
+    .transaction-detail {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link active">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">تاریخچه تراکنش‌های انبار</h5>
+                    <a href="{{ url_for('warehouse_reports') }}" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-text me-1"></i> گزارش‌گیری
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- جستجو و فیلتر -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="search-box">
+                                <input type="text" id="transactionSearch" class="form-control" placeholder="جستجو در محصولات...">
+                                <span class="search-icon">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <select id="typeFilter" class="form-select filter-box ms-2">
+                                <option value="all">همه تراکنش‌ها</option>
+                                <option value="add">افزایش موجودی</option>
+                                <option value="remove">کاهش موجودی</option>
+                                <option value="adjust">تنظیم موجودی</option>
+                            </select>
+                            <select id="dateFilter" class="form-select filter-box">
+                                <option value="all">همه زمان‌ها</option>
+                                <option value="today">امروز</option>
+                                <option value="last7days">7 روز اخیر</option>
+                                <option value="last30days">30 روز اخیر</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- جدول تراکنش‌ها -->
+                    <div class="table-responsive">
+                        <table class="table table-hover transactions-table" id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>تاریخ</th>
+                                    <th>نام کالا</th>
+                                    <th>کد کالا</th>
+                                    <th>نوع تراکنش</th>
+                                    <th>مقدار</th>
+                                    <th>موجودی فعلی</th>
+                                    <th>کاربر</th>
+                                    <th>جزئیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if transactions %}
+                                    {% for transaction in transactions %}
+                                        <tr data-type="{{ transaction.transaction_type }}" data-date="{{ transaction.timestamp.strftime('%Y-%m-%d') }}">
+                                            <td>{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ transaction.item.name }}</td>
+                                            <td>{{ transaction.item.code }}</td>
+                                            <td>
+                                                <span class="transaction-type 
+                                                    {% if transaction.transaction_type == 'add' %}
+                                                        transaction-add
+                                                    {% elif transaction.transaction_type == 'remove' %}
+                                                        transaction-remove
+                                                    {% else %}
+                                                        transaction-adjust
+                                                    {% endif %}
+                                                ">
+                                                    {% if transaction.transaction_type == 'add' %}
+                                                        افزایش
+                                                    {% elif transaction.transaction_type == 'remove' %}
+                                                        کاهش
+                                                    {% else %}
+                                                        تنظیم
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td>{{ transaction.quantity }} {{ transaction.item.unit }}</td>
+                                            <td>{{ transaction.current_quantity }} {{ transaction.item.unit }}</td>
+                                            <td>{{ transaction.user.username }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary show-details" data-id="{{ transaction.id }}">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="d-none">
+                                            <td colspan="8">
+                                                <div class="transaction-detail" id="detail-{{ transaction.id }}">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p class="mb-1"><strong>نوع تراکنش:</strong> 
+                                                                {% if transaction.transaction_type == 'add' %}
+                                                                    افزایش موجودی
+                                                                {% elif transaction.transaction_type == 'remove' %}
+                                                                    کاهش موجودی
+                                                                {% else %}
+                                                                    تنظیم موجودی
+                                                                {% endif %}
+                                                            </p>
+                                                            <p class="mb-1"><strong>مقدار:</strong> {{ transaction.quantity }} {{ transaction.item.unit }}</p>
+                                                            <p class="mb-1"><strong>موجودی قبلی:</strong> {{ transaction.previous_quantity }} {{ transaction.item.unit }}</p>
+                                                            <p class="mb-1"><strong>موجودی جدید:</strong> {{ transaction.current_quantity }} {{ transaction.item.unit }}</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p class="mb-1"><strong>کاربر:</strong> {{ transaction.user.username }}</p>
+                                                            <p class="mb-1"><strong>تاریخ:</strong> {{ transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                                            <p class="mb-1"><strong>توضیحات:</strong> {{ transaction.notes or 'بدون توضیحات' }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">هیچ تراکنشی در سیستم ثبت نشده است.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // نمایش/مخفی کردن جزئیات تراکنش
+        const detailButtons = document.querySelectorAll('.show-details');
+        
+        detailButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const transactionId = this.getAttribute('data-id');
+                const detailRow = this.closest('tr').nextElementSibling;
+                const detailContent = document.getElementById('detail-' + transactionId);
+                
+                // نمایش یا مخفی کردن سطر جزئیات
+                if (detailRow.classList.contains('d-none')) {
+                    detailRow.classList.remove('d-none');
+                    detailContent.style.display = 'block';
+                    this.innerHTML = '<i class="bi bi-dash-circle"></i>';
+                } else {
+                    detailRow.classList.add('d-none');
+                    detailContent.style.display = 'none';
+                    this.innerHTML = '<i class="bi bi-info-circle"></i>';
+                }
+            });
+        });
+        
+        // جستجو و فیلتر کردن در جدول
+        const searchInput = document.getElementById('transactionSearch');
+        const typeFilter = document.getElementById('typeFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const table = document.getElementById('transactionsTable');
+        const rows = table.querySelectorAll('tbody tr:not(.d-none)');
+        
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const typeValue = typeFilter.value;
+            const dateValue = dateFilter.value;
+            
+            let visibleCount = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.classList.contains('d-none')) continue;
+                
+                const rowData = row.textContent.toLowerCase();
+                const transactionType = row.getAttribute('data-type');
+                const transactionDate = row.getAttribute('data-date');
+                
+                const searchMatch = searchTerm === '' || rowData.includes(searchTerm);
+                const typeMatch = typeValue === 'all' || transactionType === typeValue;
+                
+                // فیلتر تاریخ
+                let dateMatch = true;
+                if (dateValue !== 'all') {
+                    const today = new Date();
+                    const transactionDateTime = new Date(transactionDate);
+                    
+                    if (dateValue === 'today') {
+                        // فقط امروز
+                        const todayStr = today.toISOString().split('T')[0];
+                        dateMatch = transactionDate === todayStr;
+                    } else if (dateValue === 'last7days') {
+                        // 7 روز اخیر
+                        const last7Days = new Date(today.setDate(today.getDate() - 7));
+                        dateMatch = transactionDateTime >= last7Days;
+                    } else if (dateValue === 'last30days') {
+                        // 30 روز اخیر
+                        const last30Days = new Date(today.setDate(today.getDate() - 30));
+                        dateMatch = transactionDateTime >= last30Days;
+                    }
+                }
+                
+                if (searchMatch && typeMatch && dateMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                    
+                    // مخفی کردن سطر جزئیات مرتبط
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow && !detailRow.classList.contains('d-none')) {
+                        const detailButton = row.querySelector('.show-details');
+                        detailButton.innerHTML = '<i class="bi bi-info-circle"></i>';
+                        detailRow.classList.add('d-none');
+                    }
+                } else {
+                    row.style.display = 'none';
+                    
+                    // مخفی کردن سطر جزئیات مرتبط
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow) {
+                        detailRow.style.display = 'none';
+                    }
+                }
+            }
+            
+            // نمایش پیام در صورت عدم وجود نتیجه
+            const noResultsRow = document.getElementById('noResultsRow');
+            if (visibleCount === 0) {
+                if (!noResultsRow) {
+                    const tbody = table.querySelector('tbody');
+                    const newRow = document.createElement('tr');
+                    newRow.id = 'noResultsRow';
+                    newRow.innerHTML = '<td colspan="8" class="text-center">هیچ نتیجه‌ای با فیلترهای انتخاب شده یافت نشد.</td>';
+                    tbody.appendChild(newRow);
+                } else {
+                    noResultsRow.style.display = '';
+                }
+            } else if (noResultsRow) {
+                noResultsRow.style.display = 'none';
+            }
+        }
+        
+        searchInput.addEventListener('input', filterTable);
+        typeFilter.addEventListener('change', filterTable);
+        dateFilter.addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+
+{% block title %}سامانه رزرو غذای دانشگاه{% endblock %}
+
+{% block extra_css %}
+<!-- استایل‌های اضافی برای صفحه اصلی -->
+<style>
+    .islamic-pattern {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><path d="M60,20 L80,60 L60,100 L40,60 Z" fill="none" stroke="%23ff9a3c" stroke-width="1" opacity="0.3"/><path d="M20,60 L60,20 L100,60 L60,100 Z" fill="none" stroke="%23ff9a3c" stroke-width="1" opacity="0.3"/><circle cx="60" cy="60" r="40" fill="none" stroke="%234e54c8" stroke-width="0.5" opacity="0.2"/></svg>');
+        background-size: 160px 160px;
+    }
+    
+    .stats-badge {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        border-radius: 8px;
+        color: white;
+        padding: 2px 10px;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-shape {
+        position: absolute;
+        bottom: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        border-radius: 22% 78% 78% 22% / 22% 22% 78% 78%;
+        background: radial-gradient(circle at center, var(--primary-color), transparent 70%);
+        opacity: 0.3;
+        z-index: 1;
+        animation: morphShape 20s infinite alternate-reverse ease-in-out;
+    }
+    
+    .hero-shape-2 {
+        position: absolute;
+        top: -60px;
+        left: -60px;
+        width: 180px;
+        height: 180px;
+        border-radius: 67% 33% 33% 67% / 33% 67% 33% 67%;
+        background: radial-gradient(circle at center, var(--secondary-color), transparent 70%);
+        opacity: 0.2;
+        z-index: 1;
+        animation: morphShape2 25s infinite alternate ease-in-out;
+    }
+    
+    @keyframes morphShape {
+        0% { border-radius: 22% 78% 78% 22% / 22% 22% 78% 78%; }
+        25% { border-radius: 67% 33% 33% 67% / 33% 67% 33% 67%; }
+        50% { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; }
+        75% { border-radius: 35% 65% 70% 30% / 60% 40% 60% 40%; }
+        100% { border-radius: 22% 78% 78% 22% / 22% 22% 78% 78%; }
+    }
+    
+    @keyframes morphShape2 {
+        0% { border-radius: 67% 33% 33% 67% / 33% 67% 33% 67%; }
+        25% { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; } 
+        50% { border-radius: 35% 65% 70% 30% / 60% 40% 60% 40%; }
+        75% { border-radius: 22% 78% 78% 22% / 22% 22% 78% 78%; }
+        100% { border-radius: 67% 33% 33% 67% / 33% 67% 33% 67%; }
+    }
+    
+    /* هاور افکت برای کارت‌های ویژگی */
+    .feature-card-fancy {
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        transition: all 0.4s ease;
+    }
+    
+    .feature-card-fancy::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, 
+            var(--secondary-color), 
+            var(--accent-color),
+            var(--primary-color),
+            var(--secondary-color));
+        z-index: -1;
+        border-radius: inherit;
+        background-size: 400% 400%;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    
+    .feature-card-fancy:hover {
+        transform: translateY(-10px);
+    }
+    
+    .feature-card-fancy:hover::before {
+        opacity: 1;
+        animation: gradientBorder 3s ease infinite;
+    }
+    
+    @keyframes gradientBorder {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    /* افکت‌های پیشرفته برای اعداد آماری */
+    .stat-number-advanced {
+        display: block;
+        font-weight: 700;
+        font-size: 2.8rem;
+        background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .stat-number-advanced::after {
+        content: '+';
+        position: absolute;
+        top: 0;
+        right: -15px;
+        font-size: 1.6rem;
+        background: var(--secondary-color);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .stat-label {
+        color: var(--light-color);
+        font-size: 1.1rem;
+        margin-top: 5px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .stat-label::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: var(--accent-color);
+        transition: width 0.3s ease;
+    }
+    
+    .stat-item:hover .stat-label::after {
+        width: 70%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+<!-- بخش قهرمان (هدر) با طراحی اسلامی پیشرفته -->
+<div class="hero-section card-glass section-fade-in shadow-xl light-dots-1 islamic-pattern">
+    <div class="hero-shape"></div>
+    <div class="hero-shape-2"></div>
+    
+    <!-- الگوی تزئینی اسلامی در بالای صفحه -->
+    <div class="text-center mb-4 slide-down" style="margin-top: -20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+            <path d="M60,10 L70,20 L60,30 L50,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M40,10 L50,20 L40,30 L30,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M80,10 L90,20 L80,30 L70,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <circle cx="60" cy="20" r="5" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+        </svg>
+    </div>
+    
+    <div class="hero-content">
+        <h1 class="hero-title text-gradient-animated shadow-text fade-in">سامانه رزرو غذای دانشگاه</h1>
+        
+        <!-- آیه‌ای از قرآن درباره غذا یا نعمت -->
+        <p class="text-center mb-3 slide-up text-glow-secondary" style="font-style: italic; color: var(--secondary-color);">
+            فَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا
+        </p>
+        <p class="text-center mb-3 slide-up" style="font-size: 0.9rem; color: #ddd;">
+            از آنچه خداوند روزی شما کرده است، حلال و پاکیزه بخورید
+        </p>
+        
+        <p class="my-4 fade-in" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+            به راحتی غذای دلخواه خود را رزرو کنید، وعده‌های غذایی را مدیریت کنید و با یک سیستم پیشرفته و کاربرپسند، از تجربه بهتری برخوردار شوید.
+        </p>
+        
+        <div class="d-flex justify-content-center my-4 fade-in">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('menu') }}" class="btn-modern shadow-lg mx-2 hover-lift btn-click-effect">
+                <i class="bi bi-calendar-plus me-2"></i>رزرو غذا
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn-glass shadow mx-2 hover-lift">
+                <i class="bi bi-speedometer2 me-2"></i>داشبورد من
+            </a>
+            {% else %}
+            <a href="{{ url_for('register') }}" class="btn-modern bg-gradient-primary shadow-lg mx-2 hover-lift btn-click-effect">
+                <i class="bi bi-person-plus me-2"></i>ثبت‌نام
+            </a>
+            <a href="{{ url_for('login') }}" class="btn-glass shadow mx-2 hover-lift">
+                <i class="bi bi-box-arrow-in-right me-2"></i>ورود
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- الگوی تزئینی اسلامی در پایین صفحه -->
+    <div class="text-center mt-4 slide-up">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+            <path d="M60,10 L70,20 L60,30 L50,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M40,10 L50,20 L40,30 L30,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M80,10 L90,20 L80,30 L70,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <circle cx="60" cy="20" r="5" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+        </svg>
+    </div>
+</div>
+
+<!-- بخش ویژگی‌ها - با طراحی اسلامی پیشرفته و مدرن -->
+<div class="my-5 section-fade-in-delay-1">
+    <!-- عنوان با تزئینات اسلامی -->
+    <div class="text-center mb-4">
+        <span class="stats-badge mb-2 slide-down">ویژگی‌های ما</span>
+        <h2 class="font-bold text-2xl mb-2 text-gradient pulse">ویژگی‌های سامانه</h2>
+        <div class="divider-gradient"></div>
+    </div>
+    
+    <div class="grid grid-cols-1 md-grid-cols-3 staggered-list">
+        <div class="feature-card feature-card-fancy card-glass staggered-item shadow-float">
+            <i class="bi bi-calendar-check feature-icon icon-gradient"></i>
+            <h3 class="text-xl font-bold mb-2 text-gradient">رزرو آسان</h3>
+            <p>رزرو غذای مورد علاقه خود را در کمتر از چند ثانیه انجام دهید. بدون نیاز به حضور فیزیکی و صف‌های طولانی.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <div class="divider-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card feature-card-fancy card-glass staggered-item shadow-float">
+            <i class="bi bi-clock-history feature-icon icon-gradient"></i>
+            <h3 class="text-xl font-bold mb-2 text-gradient">مدیریت رزروها</h3>
+            <p>رزروهای خود را به راحتی مدیریت کنید، تغییر دهید یا لغو کنید. تاریخچه رزروها همیشه در دسترس شماست.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <div class="divider-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card feature-card-fancy card-glass staggered-item shadow-float">
+            <i class="bi bi-journal-text feature-icon icon-gradient"></i>
+            <h3 class="text-xl font-bold mb-2 text-gradient">منوی متنوع</h3>
+            <p>منوی هفتگی متنوع با طیف گسترده‌ای از غذاهای ایرانی و سالم. هر روز غذای جدیدی را امتحان کنید.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <div class="divider-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- بخش آمار با طراحی اسلامی مدرن -->
+<div class="stats-container bg-glass shadow-xl section-fade-in-delay-2 gradient-light">
+    
+    <!-- تزئینات اسلامی در گوشه‌ها با افکت نور -->
+    <div class="light-dots light-dots-1" style="position: absolute; top: 15px; right: 15px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <path d="M5,5 L15,15 L5,25 M25,5 L35,15 L25,25" stroke="var(--secondary-color)" fill="none" stroke-width="1" opacity="0.6"/>
+        </svg>
+    </div>
+    <div class="light-dots light-dots-2" style="position: absolute; bottom: 15px; left: 15px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <path d="M5,5 L15,15 L5,25 M25,5 L35,15 L25,25" stroke="var(--secondary-color)" fill="none" stroke-width="1" opacity="0.6"/>
+        </svg>
+    </div>
+    
+    <!-- عنوان بخش -->
+    <div class="text-center mb-4">
+        <span class="stats-badge mb-2 slide-down">آمار و اطلاعات</span>
+        <h3 class="font-bold text-xl mb-2 text-gradient-animated">آمار سامانه</h3>
+        <div class="divider-gradient"></div>
+    </div>
+    
+    <div class="grid grid-cols-1 md-grid-cols-3">
+        <div class="stat-item">
+            <div class="stat-number-advanced" id="student-count">{{ student_count }}</div>
+            <p class="stat-label">دانشجوی فعال</p>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number-advanced" id="meal-count">{{ delivered_count }}</div>
+            <p class="stat-label">وعده غذایی سرو شده</p>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number-advanced" id="reservation-count">{{ reservation_count }}</div>
+            <p class="stat-label">رزرو غذا تاکنون</p>
+        </div>
+    </div>
+</div>
+
+<!-- بخش نحوه کار با طراحی اسلامی مدرن -->
+<div class="steps-section my-5 section-fade-in-delay-3">
+    <!-- عنوان با تزئینات اسلامی -->
+    <div class="text-center mb-4">
+        <span class="stats-badge slide-down">راهنمای کاربری</span>
+        <h2 class="font-bold text-2xl mb-2 text-gradient">نحوه کار</h2>
+        <div class="divider-gradient"></div>
+    </div>
+    
+    <div class="grid grid-cols-1 md-grid-cols-4 staggered-list">
+        <div class="step-item card-glass shadow-float staggered-item reflection">
+            <div class="step-circle glow-secondary">1</div>
+            <h4 class="font-bold mb-2 text-gradient">ثبت‌نام کنید</h4>
+            <p>با کد تغذیه دانشجویی خود ثبت‌نام کنید</p>
+        </div>
+        <div class="step-item card-glass shadow-float staggered-item reflection">
+            <div class="step-circle glow-secondary">2</div>
+            <h4 class="font-bold mb-2 text-gradient">وارد سیستم شوید</h4>
+            <p>وارد حساب کاربری خود شوید</p>
+        </div>
+        <div class="step-item card-glass shadow-float staggered-item reflection">
+            <div class="step-circle glow-secondary">3</div>
+            <h4 class="font-bold mb-2 text-gradient">انتخاب غذا</h4>
+            <p>از منوی هفتگی غذای خود را انتخاب کنید</p>
+        </div>
+        <div class="step-item card-glass shadow-float staggered-item reflection">
+            <div class="step-circle glow-secondary">4</div>
+            <h4 class="font-bold mb-2 text-gradient">دریافت غذا</h4>
+            <p>در روز مقرر وعده غذایی خود را دریافت کنید</p>
+        </div>
+    </div>
+    
+    <!-- تزئین اسلامی قبل از دکمه -->
+    <div class="text-center mt-4 mb-4">
+        <div class="divider-dots">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('menu') }}" class="btn-modern btn-rainbow py-3 px-5 shadow-xl hover-lift btn-click-effect">
+            <i class="bi bi-calendar-plus me-2"></i>مشاهده منوی غذا
+        </a>
+        {% else %}
+        <a href="{{ url_for('register') }}" class="btn-modern btn-rainbow py-3 px-5 shadow-xl hover-lift btn-click-effect">
+            <i class="bi bi-person-plus me-2"></i>شروع کنید
+        </a>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- اسکریپت شمارنده برای بخش آمار - نسخه پیشرفته -->
+<script>
+    function animateCount(elementId, finalCount, duration = 2500) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        // خواندن مقدار نهایی از متن عنصر
+        finalCount = parseInt(element.textContent) || 0;
+        
+        let startTime = null;
+        const startCount = 0;
+        
+        function easeOutQuad(t) { 
+            return t * (2 - t); 
+        }
+        
+        function updateCount(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const easedProgress = easeOutQuad(progress);
+            const currentCount = Math.floor(easedProgress * (finalCount - startCount) + startCount);
+            element.textContent = currentCount;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCount);
+            }
+        }
+        
+        requestAnimationFrame(updateCount);
+    }
+    
+    // تابع اینترسکشن آبزرور بهبود یافته
+    function setupIntersectionObserver() {
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.classList.contains('staggered-item')) {
+                        // انیمیشن آیتم‌های لیست با تاخیر
+                        entry.target.style.animation = `staggerFadeIn 0.6s ${entry.target.dataset.delay || '0s'} forwards`;
+                    } else if (entry.target.classList.contains('section-fade-in')) {
+                        // انیمیشن بخش‌های صفحه
+                        entry.target.style.animation = 'sectionFadeIn 1s ease-out forwards';
+                    } else if (entry.target.id && 
+                               (entry.target.id === 'student-count' || 
+                                entry.target.id === 'meal-count' || 
+                                entry.target.id === 'reservation-count')) {
+                        // انیمیشن شمارنده آمار
+                        animateCount(entry.target.id);
+                    }
+                    
+                    // حذف ردیابی پس از نمایش
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+        
+        // ردیابی آیتم‌های لیست تاخیردار
+        document.querySelectorAll('.staggered-item').forEach((item, index) => {
+            item.dataset.delay = `${index * 0.15}s`;
+            observer.observe(item);
+        });
+        
+        // ردیابی بخش‌های صفحه
+        document.querySelectorAll('.section-fade-in, .section-fade-in-delay-1, .section-fade-in-delay-2, .section-fade-in-delay-3').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // ردیابی شمارنده‌های آمار
+        ['student-count', 'meal-count', 'reservation-count'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) observer.observe(element);
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // راه‌اندازی اینترسکشن آبزرور
+        setupIntersectionObserver();
+        
+        // افکت‌های اضافی بعد از بارگذاری
+        setTimeout(() => {
+            document.querySelectorAll('.gradient-light').forEach(el => {
+                el.classList.add('active');
+            });
+        }, 500);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}پنل مدیریت انبار | سامانه رزرو غذای دانشگاه{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 10px;
+        color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border-left: 4px solid var(--secondary-color);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stats-card .icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2.5rem;
+        opacity: 0.3;
+    }
+    
+    .stats-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+    
+    .stats-card .stat-label {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .low-stock-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-left: 4px solid;
+    }
+    
+    .low-stock-item.low {
+        border-left-color: #fd7e14;
+        background-color: #fff8f0;
+    }
+    
+    .low-stock-item.out {
+        border-left-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .stock-status {
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .stock-status.low {
+        background-color: #fd7e14;
+        color: white;
+    }
+    
+    .stock-status.out {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .transactions-table th, .transactions-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .transaction-type {
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .transaction-add {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .transaction-remove {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .transaction-adjust {
+        background-color: #cfe2ff;
+        color: #0a58ca;
+    }
+    
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link active">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">داشبورد انبار</h2>
+                <div>
+                    <span class="text-muted">تاریخ امروز:</span>
+                    <span id="currentDate" class="ms-2 fw-bold"></span>
+                </div>
+            </div>
+            
+            <!-- کارت‌های آمار -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <div class="icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="stat-label">تعداد کل اقلام</div>
+                        <div class="stat-value">{{ total_items }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <div class="icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-label">اقلام با موجودی کم</div>
+                        <div class="stat-value">{{ low_stock_items|length }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- اقلام با موجودی کم -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">اقلام با موجودی کم</h5>
+                    <a href="{{ url_for('warehouse_items') }}" class="btn btn-sm btn-primary">مشاهده همه اقلام</a>
+                </div>
+                <div class="card-body">
+                    {% if low_stock_items %}
+                        {% for item in low_stock_items %}
+                            <div class="low-stock-item {% if item.quantity <= 0 %}out{% else %}low{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ item.name }} ({{ item.code }})</h6>
+                                        <div class="text-muted">
+                                            موجودی فعلی: {{ item.quantity }} {{ item.unit }} | حداقل موجودی: {{ item.min_quantity }} {{ item.unit }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="stock-status {% if item.quantity <= 0 %}out{% else %}low{% endif %}">
+                                            {% if item.quantity <= 0 %}
+                                                ناموجود
+                                            {% else %}
+                                                موجودی کم
+                                            {% endif %}
+                                        </span>
+                                        <a href="{{ url_for('warehouse_update_inventory', item_id=item.id) }}" class="btn btn-sm btn-outline-primary ms-2">به‌روزرسانی</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-success mb-0">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            تمام اقلام انبار دارای موجودی کافی هستند.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- تراکنش‌های اخیر -->
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">تراکنش‌های اخیر</h5>
+                    <a href="{{ url_for('warehouse_transactions') }}" class="btn btn-sm btn-primary">مشاهده همه تراکنش‌ها</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover transactions-table">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>نام کالا</th>
+                                        <th>نوع تراکنش</th>
+                                        <th>تعداد</th>
+                                        <th>موجودی فعلی</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                        <tr>
+                                            <td>{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ transaction.item.name }}</td>
+                                            <td>
+                                                <span class="transaction-type 
+                                                    {% if transaction.transaction_type == 'add' %}
+                                                        transaction-add
+                                                    {% elif transaction.transaction_type == 'remove' %}
+                                                        transaction-remove
+                                                    {% else %}
+                                                        transaction-adjust
+                                                    {% endif %}
+                                                ">
+                                                    {% if transaction.transaction_type == 'add' %}
+                                                        افزایش
+                                                    {% elif transaction.transaction_type == 'remove' %}
+                                                        کاهش
+                                                    {% else %}
+                                                        تنظیم
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td>{{ transaction.quantity }} {{ transaction.item.unit }}</td>
+                                            <td>{{ transaction.current_quantity }} {{ transaction.item.unit }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            هیچ تراکنشی تاکنون ثبت نشده است.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // نمایش تاریخ جاری به فرمت فارسی
+    document.addEventListener('DOMContentLoaded', function() {
+        // تنظیم تاریخ فعلی - فعلاً به صورت تاریخ میلادی
+        const now = new Date();
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            weekday: 'long'
+        };
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('fa-IR', options);
+    });
+</script>
+{% endblock %}

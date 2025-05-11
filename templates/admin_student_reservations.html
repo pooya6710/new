@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رزروهای دانشجو | سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">سامانه رزرو غذای دانشگاه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">رزروهای دانشجو: {{ student.feeding_code }}</h3>
+                        <a href="{{ url_for('admin_students') }}" class="btn btn-light">بازگشت به لیست دانشجویان</a>
+                    </div>
+                    <div class="card-body">
+                        <!-- نمایش خلاصه وضعیت مالی دانشجو -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title">خلاصه وضعیت مالی</h5>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>مجموع هزینه غذاهای تحویل شده:</th>
+                                                        <td>
+                                                            {% set delivered_total = 0 %}
+                                                            {% for r in reservations if r.delivered == 1 %}
+                                                                {% set delivered_total = delivered_total + r.food_price %}
+                                                            {% endfor %}
+                                                            <strong class="text-success">{{ "{:,.0f}".format(delivered_total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>مجموع هزینه غذاهای در انتظار تحویل:</th>
+                                                        <td>
+                                                            {% set pending_total = 0 %}
+                                                            {% for r in reservations if r.delivered == 0 %}
+                                                                {% set pending_total = pending_total + r.food_price %}
+                                                            {% endfor %}
+                                                            <strong class="text-warning">{{ "{:,.0f}".format(pending_total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>مجموع کل هزینه‌ها:</th>
+                                                        <td>
+                                                            {% set total = delivered_total + pending_total %}
+                                                            <strong class="text-primary">{{ "{:,.0f}".format(total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if reservations %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>شناسه</th>
+                                        <th>روز</th>
+                                        <th>وعده</th>
+                                        <th>غذا</th>
+                                        <th>قیمت (تومان)</th>
+                                        <th>تاریخ رزرو</th>
+                                        <th>وضعیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservation in reservations %}
+                                    <tr>
+                                        <td>{{ reservation.id }}</td>
+                                        <td>
+                                            {% set day_mapping = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
+                                            {{ day_mapping[reservation.day] }}
+                                        </td>
+                                        <td>
+                                            {% set meal_mapping = { 'breakfast': 'صبحانه', 'lunch': 'ناهار', 'dinner': 'شام' } %}
+                                            {{ meal_mapping[reservation.meal] }}
+                                        </td>
+                                        <td>{{ reservation.food_name }}</td>
+                                        <td>{{ "{:,.0f}".format(reservation.food_price) }}</td>
+                                        <td>{{ gregorian_to_jalali_datetime(reservation.timestamp).strftime('%Y/%m/%d %H:%M') }}</td>
+                                        <td>
+                                            {% if reservation.delivered == 1 %}
+                                            <span class="badge bg-success">تحویل شده</span>
+                                            {% else %}
+                                            <span class="badge bg-warning">در انتظار تحویل</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if reservation.delivered == 0 %}
+                                            <form action="{{ url_for('admin_delivery', reservation_id=reservation.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-success">تأیید تحویل</button>
+                                            </form>
+                                            {% else %}
+                                            <button class="btn btn-sm btn-secondary" disabled>تحویل شده</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> این دانشجو هیچ رزرو غذایی ندارد.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

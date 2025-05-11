@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت دانشجویان | سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">سامانه رزرو غذای دانشگاه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد من</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('menu') }}">منوی غذا</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">مدیریت دانشجویان</h3>
+                        <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                    </div>
+                    <div class="card-body">
+                        <!-- جستجوی دانشجو بر اساس کد تغذیه -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mx-auto">
+                                <form action="{{ url_for('admin_students') }}" method="GET" class="d-flex">
+                                    <div class="input-group">
+                                        <input type="text" name="search_code" class="form-control" placeholder="جستجو بر اساس کد تغذیه" value="{{ request.args.get('search_code', '') }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-search me-1"></i> جستجو
+                                        </button>
+                                        {% if request.args.get('search_code') %}
+                                            <a href="{{ url_for('admin_students') }}" class="btn btn-secondary">
+                                                <i class="bi bi-x-circle me-1"></i> پاک کردن
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        {% if students %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>شناسه</th>
+                                        <th>کد تغذیه</th>
+                                        <th>اعتبار (تومان)</th>
+                                        <th>بدهی (تومان)</th>
+                                        <th>تعداد رزروها</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr>
+                                        <td>{{ student.id }}</td>
+                                        <td>{{ student.feeding_code }}</td>
+                                        <td>{{ student.credit|default(0)|int }}</td>
+                                        <td>{{ student.debt|default(0)|int }}</td>
+                                        <td>{{ student.reservations|length }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_student_reservations', student_id=student.id) }}" class="btn btn-sm btn-info">مشاهده رزروها</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> هیچ دانشجویی در سیستم ثبت نشده است.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط  سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

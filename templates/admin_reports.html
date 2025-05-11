@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش‌های مدیریتی | سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js برای نمودارها -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">سامانه رزرو غذای دانشگاه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد من</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('menu') }}">منوی غذا</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">گزارش‌های آماری</h3>
+                        <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                    </div>
+                    <div class="card-body">
+                        <!-- تب‌های گزارش -->
+                        <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="food-tab" data-bs-toggle="tab" data-bs-target="#food-content" type="button" role="tab">
+                                    غذاهای پرطرفدار
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily-content" type="button" role="tab">
+                                    رزروهای روزانه
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="meal-tab" data-bs-toggle="tab" data-bs-target="#meal-content" type="button" role="tab">
+                                    آمار وعده‌ها
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial-content" type="button" role="tab">
+                                    گزارش مالی
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- محتوای تب‌ها -->
+                        <div class="tab-content" id="reportTabsContent">
+                            <!-- خلاصه وضعیت مالی -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="alert alert-info">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">خلاصه وضعیت مالی</h5>
+                                            <span class="badge bg-primary">{{ "{:,.0f}".format(financial_stats.total_price) }} تومان</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 25px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                style="width: {{ financial_stats.delivered_percentage }}%;" 
+                                                aria-valuenow="{{ financial_stats.delivered_percentage }}" 
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                تحویل شده ({{ "%.1f"|format(financial_stats.delivered_percentage) }}%)
+                                            </div>
+                                            <div class="progress-bar bg-warning" role="progressbar" 
+                                                style="width: {{ financial_stats.pending_percentage }}%;" 
+                                                aria-valuenow="{{ financial_stats.pending_percentage }}" 
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                در انتظار ({{ "%.1f"|format(financial_stats.pending_percentage) }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- آمار غذاهای پرطرفدار -->
+                            <div class="tab-pane fade show active" id="food-content" role="tabpanel" aria-labelledby="food-tab">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <canvas id="popularFoodsChart"></canvas>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="table-responsive mt-4">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>نام غذا</th>
+                                                        <th>تعداد رزرو</th>
+                                                        <th>درصد</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for food in popular_foods %}
+                                                    <tr>
+                                                        <td>{{ food.name }}</td>
+                                                        <td>{{ food.count }}</td>
+                                                        <td>{{ "%.1f"|format(food.percentage) }}%</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- آمار رزروهای روزانه -->
+                            <div class="tab-pane fade" id="daily-content" role="tabpanel" aria-labelledby="daily-tab">
+                                <div class="row">
+                                    <div class="col-md-8 mx-auto mb-4">
+                                        <canvas id="dailyReservationsChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- آمار جزئیات روزانه به تفکیک وعده -->
+                                <div class="row mt-4">
+                                    <div class="col-md-12">
+                                        <h4 class="text-center mb-4">آمار تفکیکی رزروها بر اساس روز و وعده</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>روز</th>
+                                                        <th>صبحانه</th>
+                                                        <th>ناهار</th>
+                                                        <th>شام</th>
+                                                        <th>جمع کل</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for day in daily_stats_detail %}
+                                                    <tr>
+                                                        <td>{{ day.day_name }}</td>
+                                                        <td>{{ day.breakfast }}</td>
+                                                        <td>{{ day.lunch }}</td>
+                                                        <td>{{ day.dinner }}</td>
+                                                        <td class="fw-bold">{{ day.total }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- آمار کلی رزروهای روزانه -->
+                                <div class="row mt-4">
+                                    <div class="col-md-8 mx-auto">
+                                        <h4 class="text-center mb-4">آمار کلی رزروهای روزانه</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>روز</th>
+                                                        <th>تعداد رزرو</th>
+                                                        <th>درصد کل</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for day in daily_stats %}
+                                                    <tr>
+                                                        <td>{{ day.day_name }}</td>
+                                                        <td>{{ day.count }}</td>
+                                                        <td>{{ "%.1f"|format(day.percentage) }}%</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- آمار وعده‌های غذایی -->
+                            <div class="tab-pane fade" id="meal-content" role="tabpanel" aria-labelledby="meal-tab">
+                                <div class="row">
+                                    <div class="col-md-6 mx-auto">
+                                        <canvas id="mealStatsChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="row mt-4">
+                                    <div class="col-md-6 mx-auto">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>وعده غذایی</th>
+                                                        <th>تعداد رزرو</th>
+                                                        <th>درصد کل</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for meal in meal_stats %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if meal.meal == 'breakfast' %}
+                                                                صبحانه
+                                                            {% elif meal.meal == 'lunch' %}
+                                                                ناهار
+                                                            {% elif meal.meal == 'dinner' %}
+                                                                شام
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ meal.count }}</td>
+                                                        <td>{{ "%.1f"|format(meal.percentage) }}%</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- گزارش‌های مالی -->
+                            <div class="tab-pane fade" id="financial-content" role="tabpanel" aria-labelledby="financial-tab">
+                                <div class="row">
+                                    <div class="col-md-6 mx-auto">
+                                        <canvas id="financialStatsChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- آمار هزینه به تفکیک وضعیت تحویل -->
+                                <div class="row mt-4">
+                                    <div class="col-md-8 mx-auto">
+                                        <h4 class="text-center mb-4">آمار هزینه‌ها بر اساس وضعیت تحویل</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>وضعیت</th>
+                                                        <th>مبلغ کل (تومان)</th>
+                                                        <th>درصد کل هزینه</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="badge bg-success">تحویل شده</span>
+                                                        </td>
+                                                        <td>{{ "{:,.0f}".format(financial_stats.delivered_price) }}</td>
+                                                        <td>{{ "%.1f"|format(financial_stats.delivered_percentage) }}%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="badge bg-warning">در انتظار تحویل</span>
+                                                        </td>
+                                                        <td>{{ "{:,.0f}".format(financial_stats.pending_price) }}</td>
+                                                        <td>{{ "%.1f"|format(financial_stats.pending_percentage) }}%</td>
+                                                    </tr>
+                                                    <tr class="table-active fw-bold">
+                                                        <td>مجموع کل</td>
+                                                        <td>{{ "{:,.0f}".format(financial_stats.total_price) }}</td>
+                                                        <td>100.0%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- آمار هزینه به تفکیک وعده غذایی -->
+                                <div class="row mt-4">
+                                    <div class="col-md-8 mx-auto">
+                                        <h4 class="text-center mb-4">آمار هزینه‌ها بر اساس وعده غذایی</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>وعده غذایی</th>
+                                                        <th>مبلغ کل (تومان)</th>
+                                                        <th>درصد کل هزینه</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for meal in financial_meal_stats %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if meal.meal == 'breakfast' %}
+                                                                صبحانه
+                                                            {% elif meal.meal == 'lunch' %}
+                                                                ناهار
+                                                            {% elif meal.meal == 'dinner' %}
+                                                                شام
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ "{:,.0f}".format(meal.price) }}</td>
+                                                        <td>{{ "%.1f"|format(meal.percentage) }}%</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                    <tr class="table-active fw-bold">
+                                                        <td>مجموع کل</td>
+                                                        <td>{{ "{:,.0f}".format(financial_stats.total_price) }}</td>
+                                                        <td>100.0%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- آمار هزینه به تفکیک روز هفته -->
+                                <div class="row mt-4 mb-4">
+                                    <div class="col-md-8 mx-auto">
+                                        <h4 class="text-center mb-4">آمار هزینه‌ها بر اساس روز هفته</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>روز هفته</th>
+                                                        <th>مبلغ کل (تومان)</th>
+                                                        <th>درصد کل هزینه</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for day in financial_day_stats %}
+                                                    <tr>
+                                                        <td>{{ day.day_name }}</td>
+                                                        <td>{{ "{:,.0f}".format(day.price) }}</td>
+                                                        <td>{{ "%.1f"|format(day.percentage) }}%</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                    <tr class="table-active fw-bold">
+                                                        <td>مجموع کل</td>
+                                                        <td>{{ "{:,.0f}".format(financial_stats.total_price) }}</td>
+                                                        <td>100.0%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط  سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- اسکریپت نمودارها -->
+    <script>
+        // تنظیمات مشترک برای نمودارها
+        Chart.defaults.color = '#ffffff';
+        Chart.defaults.font.family = 'Vazirmatn';
+        
+        // نمودار غذاهای پرطرفدار
+        const foodCtx = document.getElementById('popularFoodsChart').getContext('2d');
+        const foodLabels = [{% for food in popular_foods %}"{{ food.name }}",{% endfor %}];
+        const foodData = [{% for food in popular_foods %}{{ food.count }},{% endfor %}];
+        const foodColors = [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+        ];
+        
+        new Chart(foodCtx, {
+            type: 'pie',
+            data: {
+                labels: foodLabels,
+                datasets: [{
+                    data: foodData,
+                    backgroundColor: foodColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'غذاهای پرطرفدار در سیستم',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+        
+        // نمودار آمار مالی
+        const financialCtx = document.getElementById('financialStatsChart').getContext('2d');
+        const financialLabels = ["تحویل شده", "در انتظار تحویل"];
+        const financialData = [
+            {{ financial_stats.delivered_price }},
+            {{ financial_stats.pending_price }}
+        ];
+        
+        new Chart(financialCtx, {
+            type: 'pie',
+            data: {
+                labels: financialLabels,
+                datasets: [{
+                    data: financialData,
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',  // سبز برای تحویل شده
+                        'rgba(255, 193, 7, 0.8)',  // زرد برای در انتظار تحویل
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'توزیع هزینه‌ها بر اساس وضعیت تحویل',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                
+                                const value = context.raw;
+                                label += new Intl.NumberFormat('fa-IR').format(value) + ' تومان';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // نمودار رزروهای روزانه
+        const dailyCtx = document.getElementById('dailyReservationsChart').getContext('2d');
+        const dayLabels = [{% for day in daily_stats %}"{{ day.day_name }}",{% endfor %}];
+        const dayData = [{% for day in daily_stats %}{{ day.count }},{% endfor %}];
+        
+        new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: dayLabels,
+                datasets: [{
+                    label: 'تعداد رزرو',
+                    data: dayData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'تعداد رزروها بر اساس روزهای هفته',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+        
+        // نمودار وعده‌های غذایی
+        const mealCtx = document.getElementById('mealStatsChart').getContext('2d');
+        const mealLabels = [{% for meal in meal_stats %}{% if meal.meal == 'breakfast' %}"صبحانه"{% elif meal.meal == 'lunch' %}"ناهار"{% elif meal.meal == 'dinner' %}"شام"{% endif %},{% endfor %}];
+        const mealData = [{% for meal in meal_stats %}{{ meal.count }},{% endfor %}];
+        const mealColors = [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)'
+        ];
+        
+        new Chart(mealCtx, {
+            type: 'doughnut',
+            data: {
+                labels: mealLabels,
+                datasets: [{
+                    data: mealData,
+                    backgroundColor: mealColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'آمار رزرو بر اساس وعده‌های غذایی',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

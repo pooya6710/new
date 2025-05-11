@@ -1,0 +1,73 @@
+/* حل مشکل منوهای کشویی که پشت سایر عناصر قرار می‌گیرند */
+.dropdown-menu {
+    z-index: 10000000 !important;
+    position: absolute !important;
+    display: block !important; 
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background-color: var(--primary-dark);
+    border: 1px solid var(--secondary-color);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    top: 100% !important;
+}
+
+/* تضمین اینکه تمام المان‌های فرزند منوی کشویی دیده شوند */
+.dropdown-item {
+    position: relative;
+    z-index: 10000001 !important;
+}
+
+/* اطمینان از اینکه منوهای کشویی داخل نوار ناوبری دیده شوند */
+.navbar .dropdown-menu {
+    z-index: 10000002 !important;
+}
+
+/* اطمینان از اینکه منوی کاربر دیده شود */
+.dropdown-menu-end {
+    z-index: 10000003 !important;
+}
+
+/* تضمین اینکه مودال‌ها روی همه چیز قرار بگیرند */
+.modal {
+    z-index: 10000004 !important;
+}
+
+/* تنظیم z-index برای استاندارد کردن لایه‌بندی سایت */
+body {
+    z-index: 1;
+}
+
+.navbar {
+    z-index: 10000000 !important;
+    position: relative;
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+}
+
+main {
+    position: relative;
+    z-index: 1;
+}
+
+footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* رفع مشکل قرار گرفتن منوها روی یکدیگر در حالت موبایل */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        z-index: 10000005 !important;
+    }
+    
+    /* تنظیم اندازه و موقعیت منو در حالت موبایل */
+    .dropdown-menu {
+        max-height: 60vh;
+        overflow-y: auto;
+        width: 100%;
+    }
+}

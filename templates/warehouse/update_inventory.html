@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}به‌روزرسانی موجودی | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-right: 4px;
+    }
+    
+    .item-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-right: 4px solid var(--bs-primary);
+    }
+    
+    .stock-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .stock-normal {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .stock-low {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+    
+    .stock-out {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .transaction-type-btn {
+        width: 100%;
+        text-align: center;
+        border: 2px solid #dee2e6;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .transaction-type-btn:hover {
+        border-color: #adb5bd;
+    }
+    
+    .transaction-type-btn.active {
+        border-color: var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+    
+    .transaction-type-btn .icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    
+    .add-icon {
+        color: #198754;
+    }
+    
+    .remove-icon {
+        color: #dc3545;
+    }
+    
+    .adjust-icon {
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link active">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">به‌روزرسانی موجودی کالا</h5>
+                    <a href="{{ url_for('warehouse_items') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-right me-1"></i> بازگشت به لیست
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- اطلاعات کالا -->
+                    <div class="item-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>{{ item.name }}</h5>
+                                <p class="mb-1"><strong>کد کالا:</strong> {{ item.code }}</p>
+                                <p class="mb-1"><strong>دسته‌بندی:</strong> {{ item.category or 'بدون دسته' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>موجودی فعلی:</strong> {{ item.quantity }} {{ item.unit }}</p>
+                                <p class="mb-1"><strong>حداقل موجودی مجاز:</strong> {{ item.min_quantity }} {{ item.unit }}</p>
+                                <p class="mb-1">
+                                    <strong>وضعیت:</strong> 
+                                    <span class="stock-badge 
+                                        {% if item.status == 'normal' %}
+                                            stock-normal
+                                        {% elif item.status == 'low' %}
+                                            stock-low
+                                        {% else %}
+                                            stock-out
+                                        {% endif %}
+                                    ">
+                                        {% if item.status == 'normal' %}
+                                            عادی
+                                        {% elif item.status == 'low' %}
+                                            موجودی کم
+                                        {% else %}
+                                            ناموجود
+                                        {% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{{ url_for('warehouse_update_inventory', item_id=item.id) }}">
+                        <!-- نوع تراکنش -->
+                        <div class="mb-4">
+                            <label class="form-label required-field">نوع تراکنش</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="transaction-type-btn" data-value="add">
+                                        <div class="icon add-icon">
+                                            <i class="bi bi-plus-circle-fill"></i>
+                                        </div>
+                                        <div class="title">افزایش موجودی</div>
+                                        <div class="small text-muted">افزودن به موجودی فعلی</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="transaction-type-btn" data-value="remove">
+                                        <div class="icon remove-icon">
+                                            <i class="bi bi-dash-circle-fill"></i>
+                                        </div>
+                                        <div class="title">کاهش موجودی</div>
+                                        <div class="small text-muted">کم کردن از موجودی فعلی</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="transaction-type-btn" data-value="adjust">
+                                        <div class="icon adjust-icon">
+                                            <i class="bi bi-sliders"></i>
+                                        </div>
+                                        <div class="title">تنظیم موجودی</div>
+                                        <div class="small text-muted">تنظیم مقدار دقیق موجودی</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="transaction_type" id="transaction_type" required>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="quantity" class="form-label required-field"><span id="quantity_label">مقدار</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                                    <span class="input-group-text">{{ item.unit }}</span>
+                                </div>
+                                <div class="form-text" id="quantity_help">مقدار جدید را وارد کنید.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">توضیحات</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="توضیحات تکمیلی در مورد این تراکنش..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-danger">فیلدهای مشخص شده با * اجباری هستند.</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="window.history.back()">انصراف</button>
+                            <button type="submit" class="btn btn-primary">ثبت تراکنش</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // مدیریت انتخاب نوع تراکنش
+        const transactionButtons = document.querySelectorAll('.transaction-type-btn');
+        const transactionTypeInput = document.getElementById('transaction_type');
+        const quantityLabel = document.getElementById('quantity_label');
+        const quantityHelp = document.getElementById('quantity_help');
+        const quantityInput = document.getElementById('quantity');
+        
+        transactionButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // حذف کلاس active از همه دکمه‌ها
+                transactionButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // افزودن کلاس active به دکمه انتخاب شده
+                this.classList.add('active');
+                
+                // تنظیم مقدار در input مخفی
+                const transactionType = this.getAttribute('data-value');
+                transactionTypeInput.value = transactionType;
+                
+                // تغییر راهنمای فیلد مقدار بر اساس نوع تراکنش
+                if (transactionType === 'add') {
+                    quantityLabel.textContent = 'مقدار افزایش';
+                    quantityHelp.textContent = 'مقداری که می‌خواهید به موجودی فعلی اضافه کنید.';
+                    quantityInput.min = 1;
+                } else if (transactionType === 'remove') {
+                    quantityLabel.textContent = 'مقدار کاهش';
+                    quantityHelp.textContent = 'مقداری که می‌خواهید از موجودی فعلی کم کنید.';
+                    quantityInput.min = 1;
+                } else if (transactionType === 'adjust') {
+                    quantityLabel.textContent = 'مقدار جدید';
+                    quantityHelp.textContent = 'مقدار دقیق موجودی جدید را وارد کنید.';
+                    quantityInput.min = 0;
+                }
+            });
+        });
+        
+        // به صورت پیش‌فرض اولین دکمه را انتخاب می‌کنیم
+        transactionButtons[0].click();
+        
+        // بررسی اعتبار فرم قبل از ارسال
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!transactionTypeInput.value) {
+                e.preventDefault();
+                alert('لطفاً نوع تراکنش را انتخاب کنید.');
+                return false;
+            }
+            
+            // بررسی مقدار برای عملیات "کاهش"
+            if (transactionTypeInput.value === 'remove') {
+                const currentStock = {{ item.quantity }};
+                const removeAmount = parseInt(quantityInput.value, 10);
+                
+                if (removeAmount > currentStock) {
+                    e.preventDefault();
+                    alert('مقدار کاهش نمی‌تواند بیشتر از موجودی فعلی باشد.');
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}

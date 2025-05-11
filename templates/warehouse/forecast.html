@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}پیش‌بینی مصرف مواد اولیه | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .forecast-table th, .forecast-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .status-ok {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-warning {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+    
+    .status-critical {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .progress {
+        height: 8px;
+        width: 100%;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-ok {
+        background-color: #198754;
+    }
+    
+    .progress-bar-warning {
+        background-color: #fd7e14;
+    }
+    
+    .progress-bar-critical {
+        background-color: #dc3545;
+    }
+    
+    .food-category {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        border-left: 3px solid var(--bs-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link active">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">پیش‌بینی مصرف مواد اولیه</h5>
+                    <a href="{{ url_for('warehouse_reports') }}?report=forecast" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> دریافت گزارش PDF
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h5>پیش‌بینی مصرف مواد اولیه</h5>
+                                <p class="mb-0">
+                                    این گزارش بر اساس رزروهای فعلی غذا و دستورات پخت ثبت شده، میزان مصرف مواد اولیه را پیش‌بینی می‌کند و با موجودی فعلی انبار مقایسه می‌نماید. برای دستورات پخت کامل‌تر، به صفحه <a href="{{ url_for('warehouse_food_usage') }}">مدیریت دستور پخت</a> مراجعه کنید.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if forecast_data %}
+                        <!-- گروه‌بندی پیش‌بینی‌ها بر اساس نام غذا -->
+                        {% set food_groups = {} %}
+                        {% for item in forecast_data %}
+                            {% if item.food_name not in food_groups %}
+                                {% set _ = food_groups.update({item.food_name: []}) %}
+                            {% endif %}
+                            {% set _ = food_groups[item.food_name].append(item) %}
+                        {% endfor %}
+                        
+                        {% for food_name, items in food_groups.items() %}
+                            <div class="food-category mb-3">
+                                {{ food_name }} <span class="ms-2 text-muted">({{ items[0].portions }} پرس)</span>
+                            </div>
+                            
+                            <div class="table-responsive mb-4">
+                                <table class="table table-hover forecast-table">
+                                    <thead>
+                                        <tr>
+                                            <th>نام ماده اولیه</th>
+                                            <th>مصرف هر پرس</th>
+                                            <th>مجموع مورد نیاز</th>
+                                            <th>موجودی فعلی</th>
+                                            <th>وضعیت</th>
+                                            <th>نسبت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in items %}
+                                            <tr>
+                                                <td>{{ item.item_name }}</td>
+                                                <td>{{ item.quantity_per_serving }} {{ item.item.unit }}</td>
+                                                <td>{{ item.total_needed }} {{ item.item.unit }}</td>
+                                                <td>{{ item.current_quantity }} {{ item.item.unit }}</td>
+                                                <td>
+                                                    <span class="status-badge 
+                                                        {% if item.status == 'ok' %}
+                                                            status-ok
+                                                        {% elif item.status == 'warning' %}
+                                                            status-warning
+                                                        {% else %}
+                                                            status-critical
+                                                        {% endif %}
+                                                    ">
+                                                        {% if item.status == 'ok' %}
+                                                            کافی
+                                                        {% elif item.status == 'warning' %}
+                                                            کم
+                                                        {% else %}
+                                                            ناکافی
+                                                        {% endif %}
+                                                    </span>
+                                                </td>
+                                                <td style="width: 150px;">
+                                                    {% set percentage = (item.current_quantity / item.total_needed * 100) if item.total_needed > 0 else 100 %}
+                                                    {% set percentage = percentage if percentage <= 100 else 100 %}
+                                                    
+                                                    <div class="progress">
+                                                        <div class="progress-bar 
+                                                            {% if item.status == 'ok' %}
+                                                                progress-bar-ok
+                                                            {% elif item.status == 'warning' %}
+                                                                progress-bar-warning
+                                                            {% else %}
+                                                                progress-bar-critical
+                                                            {% endif %}
+                                                        " 
+                                                        role="progressbar" 
+                                                        style="width: {{ percentage }}%;" 
+                                                        aria-valuenow="{{ percentage }}" 
+                                                        aria-valuemin="0" 
+                                                        aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-end mt-1">
+                                                        <small>{{ '%0.1f'|format(percentage) }}%</small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endfor %}
+                        
+                        <!-- خلاصه وضعیت -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">خلاصه وضعیت موجودی برای پوشش رزروها</h5>
+                            </div>
+                            <div class="card-body">
+                                {% set critical_items = [] %}
+                                {% set warning_items = [] %}
+                                {% for item in forecast_data %}
+                                    {% if item.status == 'critical' %}
+                                        {% set _ = critical_items.append(item) %}
+                                    {% elif item.status == 'warning' %}
+                                        {% set _ = warning_items.append(item) %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <div class="row">
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3 rounded-3" style="background-color: #f8f9fa;">
+                                            <div class="display-4 text-success">{{ forecast_data|length - critical_items|length - warning_items|length }}</div>
+                                            <div>مواد با موجودی کافی</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3 rounded-3" style="background-color: #fff3cd;">
+                                            <div class="display-4 text-warning">{{ warning_items|length }}</div>
+                                            <div>مواد با موجودی کم</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3 rounded-3" style="background-color: #f8d7da;">
+                                            <div class="display-4 text-danger">{{ critical_items|length }}</div>
+                                            <div>مواد با موجودی ناکافی</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if critical_items %}
+                                    <div class="alert alert-danger mt-3">
+                                        <h6 class="alert-heading mb-2">مواد اولیه با موجودی ناکافی:</h6>
+                                        <ul class="mb-0">
+                                            {% for item in critical_items %}
+                                                <li>{{ item.item_name }} - نیاز: {{ item.total_needed }} {{ item.item.unit }}، موجودی: {{ item.current_quantity }} {{ item.item.unit }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if warning_items %}
+                                    <div class="alert alert-warning mt-3">
+                                        <h6 class="alert-heading mb-2">مواد اولیه با موجودی کم:</h6>
+                                        <ul class="mb-0">
+                                            {% for item in warning_items %}
+                                                <li>{{ item.item_name }} - نیاز: {{ item.total_needed }} {{ item.item.unit }}، موجودی: {{ item.current_quantity }} {{ item.item.unit }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5>اطلاعات کافی موجود نیست</h5>
+                                    <p class="mb-0">
+                                        برای تولید پیش‌بینی مصرف، نیاز به ثبت دستورات پخت و رزروهای فعال در سیستم است. لطفاً ابتدا <a href="{{ url_for('warehouse_food_usage') }}">دستورات پخت</a> را برای غذاهای منو تعریف کنید.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

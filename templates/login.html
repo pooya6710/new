@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}ورود به سامانه | سامانه رزرو غذای دانشگاه{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه ورود */
+    .auth-container {
+        min-height: calc(100vh - 250px);
+        display: flex;
+        align-items: center;
+    }
+    
+    .auth-image {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('/static/images/islamic-pattern.svg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        border-radius: 0 10px 10px 0;
+        height: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        border-right: 2px solid var(--secondary-color);
+    }
+    
+    .auth-image h2 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(90deg, var(--secondary-color), var(--secondary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+    
+    .auth-form {
+        background-color: var(--transparent-bg);
+        color: var(--light-color);
+        border-radius: 10px 0 0 10px;
+        padding: 3rem 2rem;
+        box-shadow: var(--card-shadow);
+        border-left: 2px solid var(--primary-color);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-image, .auth-form {
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+    }
+    
+    .form-heading {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .input-group-text {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        border: 1px solid var(--primary-light);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .auth-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        padding: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-top: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .auth-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .features-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 2rem;
+    }
+    
+    .features-list li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .features-list i {
+        margin-left: 0.5rem;
+        color: #e8b835;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="row g-0 shadow">
+        <!-- فرم ورود -->
+        <div class="col-md-6">
+            <div class="auth-form">
+                <h3 class="form-heading">ورود به سامانه رزرو غذا</h3>
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-4">
+                        <label for="username" class="form-label font-bold">کد تغذیه دانشجویی</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="کد تغذیه خود را وارد کنید" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label font-bold">رمز عبور</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="رمز عبور خود را وارد کنید" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary auth-btn">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>ورود به سامانه
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>حساب کاربری ندارید؟ <a href="{{ url_for('register') }}" class="text-decoration-none">ثبت‌نام کنید</a></p>
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-house-door me-1"></i>بازگشت به صفحه اصلی
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- بخش تصویر و اطلاعات -->
+        <div class="col-md-6 d-none d-md-block">
+            <div class="auth-image">
+                <h2>سامانه رزرو غذای دانشگاه</h2>
+                <p>ورود به سامانه رزرو غذا و استفاده از خدمات رزرو آنلاین غذا</p>
+                
+                <ul class="features-list">
+                    <li><i class="bi bi-check-circle"></i>رزرو آسان و سریع غذا</li>
+                    <li><i class="bi bi-check-circle"></i>مشاهده منوی هفتگی غذاها</li>
+                    <li><i class="bi bi-check-circle"></i>دسترسی به تاریخچه رزروها</li>
+                    <li><i class="bi bi-check-circle"></i>مدیریت رزروهای غذایی</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- جاوااسکریپت اضافی برای صفحه ورود -->
+<script>
+    // انیمیشن برای نمایش و مخفی کردن رمز عبور
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const passwordField = document.querySelector('.input-group:nth-of-type(2)');
+        
+        if (passwordField) {
+            // اضافه کردن دکمه نمایش رمز عبور
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'btn btn-outline-secondary';
+            toggleBtn.type = 'button';
+            toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
+            toggleBtn.title = 'نمایش رمز عبور';
+            
+            passwordField.appendChild(toggleBtn);
+            
+            toggleBtn.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                    toggleBtn.title = 'پنهان کردن رمز عبور';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
+                    toggleBtn.title = 'نمایش رمز عبور';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

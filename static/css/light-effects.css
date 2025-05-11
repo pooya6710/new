@@ -1,0 +1,373 @@
+/* جلوه‌های نور و سایه برای سایت رزرو غذای دانشگاه */
+
+:root {
+    --primary-glow-color: rgba(78, 84, 200, 0.5);
+    --secondary-glow-color: rgba(255, 154, 60, 0.5);
+    --accent-glow-color: rgba(94, 231, 223, 0.5);
+}
+
+/* افکت‌های نور */
+.glow-primary {
+    box-shadow: 0 0 15px var(--primary-glow-color);
+}
+
+.glow-secondary {
+    box-shadow: 0 0 15px var(--secondary-glow-color);
+}
+
+.glow-accent {
+    box-shadow: 0 0 15px var(--accent-glow-color);
+}
+
+.text-glow-primary {
+    text-shadow: 0 0 5px var(--primary-glow-color);
+}
+
+.text-glow-secondary {
+    text-shadow: 0 0 5px var(--secondary-glow-color);
+}
+
+.text-glow-accent {
+    text-shadow: 0 0 5px var(--accent-glow-color);
+}
+
+/* نورهای افزوده شده با محتوا */
+.glow-after::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    box-shadow: 0 0 20px var(--accent-glow-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.glow-after:hover::after {
+    opacity: 1;
+}
+
+/* انعکاس نور روی سطوح */
+.reflection {
+    position: relative;
+    overflow: hidden;
+}
+
+.reflection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: skewX(-25deg);
+    transition: all 0.7s ease;
+}
+
+.reflection:hover::before {
+    left: 120%;
+}
+
+/* نقاط نورانی تزئینی */
+.light-dots {
+    position: relative;
+}
+
+.light-dots::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    box-shadow: 0 0 10px 2px var(--secondary-glow-color);
+    animation: floatingDot 5s infinite;
+    opacity: 0.7;
+}
+
+.light-dots::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    box-shadow: 0 0 8px 2px var(--accent-glow-color);
+    animation: floatingDot 7s infinite 2s;
+    opacity: 0.5;
+}
+
+/* متغیرهای نور با موقعیت تصادفی */
+.light-dots-1::before { top: 20%; right: 10%; }
+.light-dots-1::after { top: 70%; right: 20%; }
+.light-dots-2::before { top: 30%; left: 15%; }
+.light-dots-2::after { top: 80%; left: 25%; }
+.light-dots-3::before { top: 10%; right: 20%; }
+.light-dots-3::after { top: 60%; right: 30%; }
+
+@keyframes floatingDot {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-10px, 10px); }
+    50% { transform: translate(0, 20px); }
+    75% { transform: translate(10px, 10px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* گرادیان‌های نورانی */
+.gradient-light {
+    position: relative;
+    overflow: hidden;
+}
+
+.gradient-light::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(125deg, 
+        rgba(78, 84, 200, 0.1), 
+        rgba(255, 154, 60, 0.15), 
+        rgba(94, 231, 223, 0.1));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.gradient-light:hover::after {
+    opacity: 1;
+}
+
+/* هاله‌های نورانی */
+.aura {
+    position: relative;
+}
+
+.aura::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, 
+        var(--primary-color), 
+        var(--secondary-color), 
+        var(--accent-color), 
+        var(--primary-color));
+    background-size: 400% 400%;
+    animation: auraGlow 10s ease infinite;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.aura:hover::before {
+    opacity: 0.6;
+}
+
+@keyframes auraGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* لبه‌های نورانی */
+.edge-light {
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
+.edge-light::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: -1px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, 
+        var(--secondary-color), 
+        var(--primary-color), 
+        var(--accent-color), 
+        var(--secondary-color));
+    background-size: 500% 500%;
+    animation: edgeGlow 10s linear infinite;
+    z-index: -1;
+}
+
+@keyframes edgeGlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+/* نور پس‌زمینه سکشن‌ها */
+.bg-light-gradient {
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-light-gradient::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, 
+        rgba(94, 231, 223, 0.1) 0%, 
+        rgba(78, 84, 200, 0.1) 30%, 
+        transparent 70%);
+    animation: rotateGradient 30s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotateGradient {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* دکمه‌های نورانی */
+.btn-glow {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        rgba(var(--primary-color-rgb), 0.8), 
+        rgba(var(--accent-color-rgb), 0.4), 
+        rgba(var(--secondary-color-rgb), 0.8));
+    background-size: 200% 200%;
+    animation: buttonGlow 5s linear infinite;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-glow:hover::before {
+    opacity: 1;
+}
+
+@keyframes buttonGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* جلوه‌های سایه */
+
+/* سایه‌های متفاوت */
+.shadow-soft {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-medium {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-hard {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-inner {
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-text {
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* سایه‌های رنگی */
+.shadow-primary {
+    box-shadow: 0 8px 25px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.shadow-secondary {
+    box-shadow: 0 8px 25px rgba(var(--secondary-color-rgb), 0.3);
+}
+
+.shadow-accent {
+    box-shadow: 0 8px 25px rgba(var(--accent-color-rgb), 0.3);
+}
+
+/* سایه حرکتی */
+.shadow-float {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.shadow-float:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+/* سایه‌های گرادیانی */
+.shadow-gradient {
+    position: relative;
+}
+
+.shadow-gradient::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    filter: blur(10px);
+    z-index: -1;
+}
+
+/* سایه‌های متن */
+.text-shadow-subtle {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.text-shadow-bold {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.text-shadow-glow {
+    text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
+}
+
+/* مناطق نورانی خاص */
+.spotlight {
+    position: relative;
+}
+
+.spotlight::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle at center, 
+        rgba(var(--secondary-color-rgb), 0.2) 0%, 
+        transparent 60%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.spotlight:hover::before {
+    opacity: 1;
+}

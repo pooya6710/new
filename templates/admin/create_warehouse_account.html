@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}ایجاد حساب انباردار | پنل مدیریت{% endblock %}
+
+{% block extra_css %}
+<style>
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-right: 4px;
+    }
+    
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .password-strength {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 5px;
+        transition: all 0.3s;
+    }
+    
+    .password-strength-weak {
+        background-color: #dc3545;
+        width: 30%;
+    }
+    
+    .password-strength-medium {
+        background-color: #fd7e14;
+        width: 60%;
+    }
+    
+    .password-strength-strong {
+        background-color: #198754;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>ایجاد حساب کاربری انباردار</h2>
+            <p class="text-muted">ایجاد حساب کاربری جدید با دسترسی مدیریت انبار</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('admin_warehouse') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-right me-1"></i> بازگشت به مدیریت انبار
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">اطلاعات حساب کاربری</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('admin_create_warehouse_account') }}" id="warehouseAccountForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label required-field">نام کاربری</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="form-text">نام کاربری باید منحصر به فرد باشد. پیشنهاد می‌شود از "warehouse_manager" استفاده کنید.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label required-field">رمز عبور</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="password-strength" id="passwordStrength"></div>
+                            <div class="form-text" id="passwordStrengthText">رمز عبور باید حداقل 8 کاراکتر باشد و شامل حروف بزرگ، کوچک و اعداد باشد.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label required-field">تأیید رمز عبور</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <div class="form-text" id="passwordMatchText"></div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-info-circle-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5>توجه</h5>
+                                    <p class="mb-0">
+                                        کاربر ایجاد شده دسترسی کامل به مدیریت انبار خواهد داشت. این شامل مدیریت اقلام، به‌روزرسانی موجودی‌ها، مشاهده تراکنش‌ها و تولید گزارش‌ها می‌شود.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-danger">فیلدهای مشخص شده با * اجباری هستند.</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="window.history.back()">انصراف</button>
+                            <button type="submit" class="btn btn-primary">ایجاد حساب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+        const passwordMatchText = document.getElementById('passwordMatchText');
+        const form = document.getElementById('warehouseAccountForm');
+        
+        // بررسی قدرت رمز عبور
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // حداقل طول 8 کاراکتر
+            if (password.length >= 8) {
+                strength += 1;
+            }
+            
+            // بررسی وجود حروف بزرگ
+            if (/[A-Z]/.test(password)) {
+                strength += 1;
+            }
+            
+            // بررسی وجود حروف کوچک
+            if (/[a-z]/.test(password)) {
+                strength += 1;
+            }
+            
+            // بررسی وجود اعداد
+            if (/[0-9]/.test(password)) {
+                strength += 1;
+            }
+            
+            // بررسی وجود کاراکترهای خاص
+            if (/[^A-Za-z0-9]/.test(password)) {
+                strength += 1;
+            }
+            
+            // نمایش قدرت رمز عبور
+            if (password.length === 0) {
+                passwordStrength.className = 'password-strength';
+                passwordStrengthText.textContent = 'رمز عبور باید حداقل 8 کاراکتر باشد و شامل حروف بزرگ، کوچک و اعداد باشد.';
+                passwordStrengthText.className = 'form-text';
+            } else if (strength < 3) {
+                passwordStrength.className = 'password-strength password-strength-weak';
+                passwordStrengthText.textContent = 'رمز عبور ضعیف است.';
+                passwordStrengthText.className = 'form-text text-danger';
+            } else if (strength < 4) {
+                passwordStrength.className = 'password-strength password-strength-medium';
+                passwordStrengthText.textContent = 'رمز عبور متوسط است.';
+                passwordStrengthText.className = 'form-text text-warning';
+            } else {
+                passwordStrength.className = 'password-strength password-strength-strong';
+                passwordStrengthText.textContent = 'رمز عبور قوی است.';
+                passwordStrengthText.className = 'form-text text-success';
+            }
+        });
+        
+        // بررسی تطابق رمز عبور
+        confirmPasswordInput.addEventListener('input', function() {
+            const password = passwordInput.value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword.length === 0) {
+                passwordMatchText.textContent = '';
+                passwordMatchText.className = 'form-text';
+            } else if (password === confirmPassword) {
+                passwordMatchText.textContent = 'رمز عبور مطابقت دارد.';
+                passwordMatchText.className = 'form-text text-success';
+            } else {
+                passwordMatchText.textContent = 'رمز عبور مطابقت ندارد.';
+                passwordMatchText.className = 'form-text text-danger';
+            }
+        });
+        
+        // اعتبارسنجی فرم قبل از ارسال
+        form.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('رمز عبور باید حداقل 8 کاراکتر باشد.');
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('رمز عبور و تأیید آن مطابقت ندارند.');
+                return false;
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}

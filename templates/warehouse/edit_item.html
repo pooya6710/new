@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}ویرایش قلم انبار | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-right: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link active">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">ویرایش اطلاعات کالا</h5>
+                    <a href="{{ url_for('warehouse_items') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-right me-1"></i> بازگشت به لیست
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('warehouse_edit_item', item_id=item.id) }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="code" class="form-label required-field">کد کالا</label>
+                                <input type="text" class="form-control" id="code" name="code" value="{{ item.code }}" required>
+                                <div class="form-text">یک کد منحصر به فرد برای کالا وارد کنید.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="name" class="form-label required-field">نام کالا</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ item.name }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">دسته‌بندی</label>
+                                <input type="text" class="form-control" id="category" name="category" value="{{ item.category or '' }}" list="categoriesList">
+                                <datalist id="categoriesList">
+                                    <option value="مواد غذایی">
+                                    <option value="لوازم آشپزخانه">
+                                    <option value="نوشیدنی">
+                                    <option value="گوشت">
+                                    <option value="لبنیات">
+                                    <option value="خشکبار">
+                                    <option value="ادویه">
+                                    <option value="حبوبات">
+                                    <option value="سایر">
+                                </datalist>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="unit" class="form-label required-field">واحد اندازه‌گیری</label>
+                                <input type="text" class="form-control" id="unit" name="unit" value="{{ item.unit }}" list="unitsList" required>
+                                <datalist id="unitsList">
+                                    <option value="عدد">
+                                    <option value="کیلوگرم">
+                                    <option value="گرم">
+                                    <option value="لیتر">
+                                    <option value="میلی‌لیتر">
+                                    <option value="بسته">
+                                    <option value="جعبه">
+                                </datalist>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="stock_display" class="form-label">موجودی فعلی</label>
+                                <input type="text" class="form-control" id="stock_display" value="{{ item.quantity }} {{ item.unit }}" disabled>
+                                <div class="form-text">برای تغییر موجودی از گزینه «تغییر موجودی» در صفحه لیست اقلام استفاده کنید.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="min_quantity" class="form-label">حداقل موجودی مجاز</label>
+                                <input type="number" class="form-control" id="min_quantity" name="min_quantity" min="0" value="{{ item.min_quantity }}">
+                                <div class="form-text">هنگامی که موجودی از این حد کمتر شود، هشدار داده می‌شود.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">توضیحات</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ item.description or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-danger">فیلدهای مشخص شده با * اجباری هستند.</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="reset" class="btn btn-outline-secondary ms-2">انصراف</button>
+                            <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

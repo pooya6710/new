@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}گزارش‌گیری انبار | مدیریت انبار{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warehouse-nav .nav-link {
+        padding: 0.8rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .warehouse-nav .nav-link:hover, .warehouse-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+    }
+    
+    .warehouse-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-left: 8px;
+    }
+    
+    .report-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .report-card:hover {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0.125rem 0.25rem rgba(var(--bs-primary-rgb), 0.2);
+    }
+    
+    .report-card.active {
+        border-color: var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+    
+    .report-card .icon {
+        font-size: 2rem;
+        color: var(--bs-primary);
+        margin-bottom: 15px;
+    }
+    
+    .report-form {
+        display: none;
+    }
+    
+    .report-form.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- ستون سایدبار -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">مدیریت انبار</h5>
+                    <div class="warehouse-nav">
+                        <a href="{{ url_for('warehouse_dashboard') }}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                        <a href="{{ url_for('warehouse_items') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> مدیریت اقلام
+                        </a>
+                        <a href="{{ url_for('warehouse_transactions') }}" class="nav-link">
+                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
+                        </a>
+                        <a href="{{ url_for('warehouse_food_usage') }}" class="nav-link">
+                            <i class="bi bi-journal-text"></i> دستور پخت
+                        </a>
+                        <a href="{{ url_for('warehouse_forecast') }}" class="nav-link">
+                            <i class="bi bi-graph-up"></i> پیش‌بینی مصرف
+                        </a>
+                        <a href="{{ url_for('warehouse_reports') }}" class="nav-link active">
+                            <i class="bi bi-file-earmark-text"></i> گزارش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">گزارش‌گیری انبار</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">لطفاً نوع گزارش مورد نظر خود را انتخاب کنید:</p>
+                    
+                    <!-- کارت‌های انتخاب نوع گزارش -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="report-card active" data-report="inventory">
+                                <div class="icon">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
+                                <h5>گزارش موجودی انبار</h5>
+                                <p class="text-muted">گزارش کامل از موجودی فعلی تمام اقلام انبار</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="report-card" data-report="transactions">
+                                <div class="icon">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </div>
+                                <h5>گزارش تراکنش‌ها</h5>
+                                <p class="text-muted">گزارش تراکنش‌های انبار در بازه زمانی مشخص</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="report-card" data-report="forecast">
+                                <div class="icon">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                <h5>پیش‌بینی مصرف</h5>
+                                <p class="text-muted">گزارش پیش‌بینی مصرف مواد اولیه بر اساس رزروهای فعلی</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- فرم گزارش موجودی انبار -->
+                    <div id="inventoryReportForm" class="report-form active">
+                        <h5 class="mb-3">گزارش موجودی انبار</h5>
+                        <form method="post" action="{{ url_for('warehouse_generate_report') }}">
+                            <input type="hidden" name="report_type" value="inventory">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="inventory_category" class="form-label">دسته‌بندی</label>
+                                    <select id="inventory_category" name="category" class="form-select">
+                                        <option value="all">همه دسته‌بندی‌ها</option>
+                                        {% set categories = [] %}
+                                        {% for item in items %}
+                                            {% if item.category and item.category not in categories %}
+                                                {% set _ = categories.append(item.category) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% for category in categories|sort %}
+                                            <option value="{{ category }}">{{ category }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inventory_item" class="form-label">کالای مشخص</label>
+                                    <select id="inventory_item" name="item_id" class="form-select">
+                                        <option value="all">همه کالاها</option>
+                                        {% for item in items %}
+                                            <option value="{{ item.id }}">{{ item.name }} ({{ item.code }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> دریافت گزارش PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- فرم گزارش تراکنش‌ها -->
+                    <div id="transactionsReportForm" class="report-form">
+                        <h5 class="mb-3">گزارش تراکنش‌های انبار</h5>
+                        <form method="post" action="{{ url_for('warehouse_generate_report') }}">
+                            <input type="hidden" name="report_type" value="transactions">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="date_from" class="form-label">از تاریخ</label>
+                                    <input type="date" id="date_from" name="date_from" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="date_to" class="form-label">تا تاریخ</label>
+                                    <input type="date" id="date_to" name="date_to" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="transaction_item" class="form-label">کالای مشخص</label>
+                                <select id="transaction_item" name="item_id" class="form-select">
+                                    <option value="all">همه کالاها</option>
+                                    {% for item in items %}
+                                        <option value="{{ item.id }}">{{ item.name }} ({{ item.code }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> دریافت گزارش PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- فرم گزارش پیش‌بینی مصرف -->
+                    <div id="forecastReportForm" class="report-form">
+                        <h5 class="mb-3">گزارش پیش‌بینی مصرف مواد اولیه</h5>
+                        <form method="post" action="{{ url_for('warehouse_generate_report') }}">
+                            <input type="hidden" name="report_type" value="forecast">
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                این گزارش بر اساس رزروهای فعلی و دستورات پخت ثبت شده، نیاز به مواد اولیه را محاسبه و با موجودی فعلی مقایسه می‌کند.
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> دریافت گزارش PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // مدیریت تب‌های نوع گزارش
+        const reportCards = document.querySelectorAll('.report-card');
+        const reportForms = document.querySelectorAll('.report-form');
+        
+        reportCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const reportType = this.getAttribute('data-report');
+                
+                // غیرفعال کردن همه کارت‌ها و فرم‌ها
+                reportCards.forEach(c => c.classList.remove('active'));
+                reportForms.forEach(f => f.classList.remove('active'));
+                
+                // فعال کردن کارت و فرم مربوطه
+                this.classList.add('active');
+                document.getElementById(reportType + 'ReportForm').classList.add('active');
+            });
+        });
+        
+        // تنظیم مقادیر پیش‌فرض برای تاریخ‌ها
+        const dateFrom = document.getElementById('date_from');
+        const dateTo = document.getElementById('date_to');
+        
+        // تاریخ امروز
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // تاریخ یک ماه قبل
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
+        
+        dateTo.value = todayStr;
+        dateFrom.value = oneMonthAgoStr;
+    });
+</script>
+{% endblock %}

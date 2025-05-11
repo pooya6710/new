@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منوی غذا | سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">سامانه رزرو غذای دانشگاه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد من</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('menu') }}">منوی غذا</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3>منوی غذای هفتگی</h3>
+                            <form action="{{ url_for('reserve_all_week', week=week_offset) }}" method="POST">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-calendar-week"></i> رزرو خودکار کل هفته
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- انتخاب هفته جاری یا آینده -->
+                        <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('menu', week=0) }}" class="btn {% if week_offset == 0 %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-check"></i> هفته جاری
+                                </a>
+                                <a href="{{ url_for('menu', week=1) }}" class="btn {% if week_offset == 1 %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-plus"></i> هفته آینده
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- تب‌های روزهای هفته -->
+                        <ul class="nav nav-tabs mb-4" id="dayTabs" role="tablist">
+                            {% for day_menu in weekly_menu %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                        id="{{ day_menu.day }}-tab" 
+                                        data-bs-toggle="tab" 
+                                        data-bs-target="#{{ day_menu.day }}-content" 
+                                        type="button" 
+                                        role="tab" 
+                                        aria-controls="{{ day_menu.day }}-content" 
+                                        aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+                                    {{ days[day_menu.display_day] }}
+                                </button>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <!-- محتوای تب‌ها -->
+                        <div class="tab-content" id="dayTabsContent">
+                            {% for day_menu in weekly_menu %}
+                            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                                 id="{{ day_menu.day }}-content" 
+                                 role="tabpanel" 
+                                 aria-labelledby="{{ day_menu.day }}-tab">
+                                
+                                <div class="row">
+                                    <!-- صبحانه -->
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-info text-white">
+                                                <h5 class="mb-0">
+                                                    <i class="bi bi-sun"></i> {{ meals['breakfast'] }}
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="list-group">
+                                                    {% for food in day_menu.meal_data.breakfast %}
+                                                    {% if loop.first %}
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                <strong>2000 تومان</strong>
+                                                            </small>
+                                                        </div>
+                                                        <form action="{{ url_for('reserve', week=week_offset) }}" method="POST">
+                                                            <input type="hidden" name="day" value="{{ day_menu.day }}">
+                                                            <input type="hidden" name="meal" value="breakfast">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}2000{% endif %}">
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                <i class="bi bi-plus-lg"></i> رزرو
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- ناهار -->
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h5 class="mb-0">
+                                                    <i class="bi bi-brightness-high"></i> {{ meals['lunch'] }}
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="list-group">
+                                                    {% for food in day_menu.meal_data.lunch %}
+                                                    {% if loop.first %}
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                <strong>3000 تومان</strong>
+                                                            </small>
+                                                        </div>
+                                                        <form action="{{ url_for('reserve', week=week_offset) }}" method="POST">
+                                                            <input type="hidden" name="day" value="{{ day_menu.day }}">
+                                                            <input type="hidden" name="meal" value="lunch">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}3000{% endif %}">
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                <i class="bi bi-plus-lg"></i> رزرو
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- شام -->
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-dark text-white">
+                                                <h5 class="mb-0">
+                                                    <i class="bi bi-moon"></i> {{ meals['dinner'] }}
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="list-group">
+                                                    {% for food in day_menu.meal_data.dinner %}
+                                                    {% if loop.first %}
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                <strong>5000 تومان</strong>
+                                                            </small>
+                                                        </div>
+                                                        <form action="{{ url_for('reserve', week=week_offset) }}" method="POST">
+                                                            <input type="hidden" name="day" value="{{ day_menu.day }}">
+                                                            <input type="hidden" name="meal" value="dinner">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}5000{% endif %}">
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                <i class="bi bi-plus-lg"></i> رزرو
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- دکمه رزرو تمام وعده‌های روز -->
+                                <div class="mt-3 text-center">
+                                    <form action="{{ url_for('reserve_all_day', week=week_offset) }}" method="POST" class="mb-3">
+                                        <input type="hidden" name="day" value="{{ day_menu.day }}">
+                                        <button type="submit" class="btn btn-lg btn-success"><i class="bi bi-calendar-check"></i> رزرو تمام وعده‌های {{ days[day_menu.display_day] }}</button>
+                                    </form>
+                                    <a href="{{ url_for('dashboard') }}" class="btn btn-lg btn-outline-primary"><i class="bi bi-chevron-right"></i> بازگشت به داشبورد</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 text-center mt-5">
+        <div class="container">
+            <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده توسط  سرباز</p>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

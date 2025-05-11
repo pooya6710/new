@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت انبار | پنل مدیریت{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-card .icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        opacity: 0.3;
+    }
+    
+    .status-card .count {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .status-card .label {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .card-blue {
+        background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        border-left: 4px solid #3f51b5;
+    }
+    
+    .card-red {
+        background: linear-gradient(135deg, #ff0844, #ffb199);
+        border-left: 4px solid #f44336;
+    }
+    
+    .low-stock-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-left: 4px solid;
+    }
+    
+    .low-stock-item.low {
+        border-left-color: #fd7e14;
+        background-color: #fff8f0;
+    }
+    
+    .low-stock-item.out {
+        border-left-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .stock-status {
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .stock-status.low {
+        background-color: #fd7e14;
+        color: white;
+    }
+    
+    .stock-status.out {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .action-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .action-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .action-card .card-header {
+        background-color: #4e54c8;
+        color: white;
+        font-weight: bold;
+        padding: 15px;
+    }
+    
+    .action-card .card-body {
+        padding: 20px;
+    }
+    
+    .action-card .btn-action {
+        width: 100%;
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>مدیریت انبار</h2>
+            <p class="text-muted">دسترسی به مدیریت انبار و موجودی‌ها</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('admin') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-right me-1"></i> بازگشت به داشبورد
+            </a>
+        </div>
+    </div>
+    
+    <!-- کارت‌های آمار -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="status-card card-blue">
+                <div class="icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="count">{{ total_items }}</div>
+                <div class="label">تعداد کل اقلام</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="status-card card-red">
+                <div class="icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="count">{{ low_stock_items|length }}</div>
+                <div class="label">اقلام با موجودی کم</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- کارت‌های اقدام سریع -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="action-card">
+                <div class="card-header">
+                    <i class="bi bi-person-plus me-2"></i> ایجاد حساب انباردار
+                </div>
+                <div class="card-body">
+                    <p>ایجاد حساب کاربری جدید برای مدیر انبار با دسترسی‌های لازم</p>
+                    <a href="{{ url_for('admin_create_warehouse_account') }}" class="btn btn-primary btn-action">ایجاد حساب</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="action-card">
+                <div class="card-header">
+                    <i class="bi bi-eye me-2"></i> مشاهده انبار
+                </div>
+                <div class="card-body">
+                    <p>مشاهده داشبورد مدیریت انبار و دسترسی به تمام بخش‌های آن</p>
+                    <a href="{{ url_for('warehouse_dashboard') }}" class="btn btn-primary btn-action">مشاهده انبار</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="action-card">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> گزارش‌گیری
+                </div>
+                <div class="card-body">
+                    <p>دریافت گزارش‌های مختلف از وضعیت انبار و موجودی‌ها</p>
+                    <a href="{{ url_for('warehouse_reports') }}" class="btn btn-primary btn-action">گزارش‌ها</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- اقلام با موجودی کم -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">اقلام با موجودی کم یا ناموجود</h5>
+            <a href="{{ url_for('warehouse_items') }}" class="btn btn-sm btn-primary">مدیریت اقلام</a>
+        </div>
+        <div class="card-body">
+            {% if low_stock_items %}
+                {% for item in low_stock_items %}
+                    <div class="low-stock-item {% if item.quantity <= 0 %}out{% else %}low{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ item.name }} ({{ item.code }})</h6>
+                                <div class="text-muted">
+                                    موجودی فعلی: {{ item.quantity }} {{ item.unit }} | حداقل موجودی: {{ item.min_quantity }} {{ item.unit }}
+                                </div>
+                            </div>
+                            <div>
+                                <span class="stock-status {% if item.quantity <= 0 %}out{% else %}low{% endif %}">
+                                    {% if item.quantity <= 0 %}
+                                        ناموجود
+                                    {% else %}
+                                        موجودی کم
+                                    {% endif %}
+                                </span>
+                                <a href="{{ url_for('warehouse_update_inventory', item_id=item.id) }}" class="btn btn-sm btn-outline-primary ms-2">به‌روزرسانی</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    تمام اقلام انبار دارای موجودی کافی هستند.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- راهنمای مدیریت انبار -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="card-title mb-0">راهنمای مدیریت انبار</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="bi bi-box-seam me-2 text-primary"></i>مدیریت اقلام</h6>
+                    <p>در بخش مدیریت اقلام می‌توانید تمام اقلام موجود در انبار را مشاهده، اضافه، ویرایش و حذف کنید.</p>
+                    
+                    <h6><i class="bi bi-arrow-left-right me-2 text-primary"></i>تراکنش‌ها</h6>
+                    <p>در بخش تراکنش‌ها می‌توانید تاریخچه کامل ورود و خروج کالاها از انبار را مشاهده کنید.</p>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="bi bi-journal-text me-2 text-primary"></i>دستور پخت</h6>
+                    <p>در این بخش می‌توانید برای هر نوع غذا مشخص کنید که چه مقدار از هر ماده اولیه برای پخت یک پرس از آن نیاز است.</p>
+                    
+                    <h6><i class="bi bi-graph-up me-2 text-primary"></i>پیش‌بینی مصرف</h6>
+                    <p>بر اساس رزروهای فعلی غذا و دستورات پخت، این بخش به شما نشان می‌دهد که چه مقدار مواد اولیه برای تأمین رزروها نیاز دارید.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
